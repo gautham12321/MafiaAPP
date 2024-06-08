@@ -1,5 +1,6 @@
 package com.gautham.mafia.ui
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,9 +38,10 @@ import com.gautham.mafia.Navigation.RoomFound
 fun MafiaApp(
     navController: NavHostController,
     viewmodel: MainViewModel,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+
 )
-{
+{val context = LocalContext.current
 
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
@@ -46,7 +49,7 @@ fun MafiaApp(
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
    val isConnecting by viewmodel._isConnecting.collectAsState()
-
+val noRoles = gameSettings.noMafia+gameSettings.noDoctor+gameSettings.noCitizen+gameSettings.noDetective+gameSettings.noGod
     BackGroundScreen(ratio = ratioAnimator) {
         NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
 
@@ -71,10 +74,16 @@ fun MafiaApp(
             composable<CreateRoom> {
                 ratio=it.toRoute<CreateRoom>().ratio
                 CreateRoom(gameSettings = gameSettings, onNavigate = {
-                    viewmodel.createRoom()
+                    if(noRoles==gameSettings.totalP) {
+                        viewmodel.createRoom()
 
                         navController.navigate(Lobby)
+                    }
+                    else{
 
+                        Toast.makeText(context, "No of Roles does not match total players", Toast.LENGTH_SHORT).show()
+
+                    }
 
                 }, onChange = {
                     viewmodel.changeGameSettings(it)
@@ -90,7 +99,10 @@ fun MafiaApp(
                 LobbyScreen(room_id = state.id, onStart = {},
                     isHost = it.toRoute<Lobby>().isHost,
                     isConnecting = isConnecting,
-                    onChange = {viewmodel.changeGameSettings(it)})
+                    onChange = {viewmodel.changeGameSettings(it)},
+                    gameSettings = gameSettings,
+                    players = state.players,
+                    hostId=state.host)
 
             }
             composable<JoinRoom> {

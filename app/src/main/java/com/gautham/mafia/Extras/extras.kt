@@ -1,5 +1,8 @@
 package com.gautham.mafia.Extras
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -62,7 +65,12 @@ fun Modifier.shadow(
      val copyIcon = ImageVector.vectorResource(id = R.drawable.copyicon)
      return copyIcon
  }
-
+fun copyToClipboard(context: Context, text: String) {
+    val clipboardManager =
+        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("RoomID", text)
+    clipboardManager.setPrimaryClip(clip)
+}
 
 val avatarImages = listOf(
     R.drawable._043229_afro_avatar_male_man_icon,

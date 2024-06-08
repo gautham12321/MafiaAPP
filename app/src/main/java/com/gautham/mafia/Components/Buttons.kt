@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
@@ -35,15 +36,15 @@ import com.gautham.mafia.ui.theme.Typography
 @Preview(showBackground = true)
 @Composable
 fun Button_M(text:String="Create Room",
-             modifier: Modifier=Modifier,size:TextUnit=35.sp,
-             onClick: ()->Unit={},colour:ButtonColors= ButtonDefaults.buttonColors()){
+             modifier: Modifier=Modifier, size:TextUnit=35.sp,
+             onClick: ()->Unit={}, colour:ButtonColors= ButtonDefaults.buttonColors(disabledContainerColor = Color.Gray), enabled:Boolean=true){
 
   Button(onClick = onClick,
         modifier = modifier.padding(vertical = 15.dp)
         ,shape=shapes.medium,
         contentPadding =
         PaddingValues(horizontal = 6.dp, vertical = 20.dp),
-        colors = colour
+        colors = colour, enabled = enabled
 
 
 

@@ -1,6 +1,5 @@
 package com.gautham.mafia
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,7 +25,11 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val viewmodel = hiltViewModel<MainViewModel>()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MafiaApp(navController=navController,viewmodel=viewmodel,innerPadding=innerPadding)
+                    MafiaApp(
+                        navController=navController,
+                        viewmodel=viewmodel,
+                        innerPadding=innerPadding,
+                    )
 
                 }
             }

@@ -14,6 +14,7 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.http.cio.websocket.close
 import io.ktor.http.cio.websocket.readText
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -29,6 +30,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 interface RealTimeMessagingClient {
+     val gameStateChannel: Channel<GameState>
     fun getGameStateStream(): Flow<GameState>
     suspend fun loadSession()
     suspend fun sendAction(action: DoAction)
@@ -43,48 +45,34 @@ interface RealTimeMessagingClient {
     suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings)
 }
 class KtorRMC( val client: HttpClient) : RealTimeMessagingClient {
-
+     override val gameStateChannel = Channel<GameState>()
     var session: WebSocketSession?=null
 
-    override fun getGameStateStream(): Flow<GameState> {
-        var gameState:Flow<GameState>
-
-        return flow {
-
-
-
-
-            gameState = session!!.incoming
-                .consumeAsFlow()
-                .onEach { Log.d("messages", "Received message: $it") }
-                .catch { Log.e("Error", "Error processing message", it) }
-                .filterIsInstance<Frame.Text>()
-                .mapNotNull { frame ->
-                    try {
-                        Json.decodeFromString<GameState>(frame.readText())
-                    } catch (e: Exception) {
-                        Log.e("Error", "Error decoding JSON", e)
-                        null
-                    }
-                }
-            emitAll(gameState)
-
-
-
-
-        }
-
-
-    }
+    override fun getGameStateStream(): Flow<GameState> =gameStateChannel.consumeAsFlow()
 //CHECKCKCKCKCKCKKCKCC
     override suspend fun loadSession() {
-        session =client.webSocketSession{
-            url("ws://192.168.1.42:8080/play")
-        }
-    Log.d("session",session.toString())
-
-
+    session = client.webSocketSession {
+        url("ws://192.168.1.42:8080/play")
     }
+    Log.d("session", session.toString())
+
+    session?.incoming
+        ?.consumeAsFlow()
+        ?.filterIsInstance<Frame.Text>()
+        ?.mapNotNull { frame ->
+            try {
+                Json.decodeFromString<GameState>(frame.readText())
+            } catch (e: Exception) {
+                Log.e("Error", "Error decoding JSON", e)
+                null
+            }
+        }
+        ?.collect { gameState ->
+            gameStateChannel.send(gameState) // Send the GameState to the channel
+        }
+
+
+}
 
     override suspend fun sendAction(action: DoAction) {
         session?.outgoing?.send(Frame.Text("make_turn#${Json.encodeToString(action)}"))
