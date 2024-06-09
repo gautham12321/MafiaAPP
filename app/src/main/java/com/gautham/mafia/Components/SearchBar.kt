@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLayoutInput
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gautham.mafia.globals.RoomID
@@ -61,7 +62,7 @@ fun searchBar_M(modifier: Modifier=Modifier,onSearch:(String)->Unit){
            // Text(text = query)
            TextField(singleLine = true, textStyle = Typography.labelMedium,value = textinput.uppercase(),
                 onValueChange = {
-                                if(it.length< RoomID.length) textinput=it
+                                if(it.length<= RoomID.length) textinput=it
                 },modifier= Modifier
                    .weight(1f)
                    .fillMaxSize().height(50.dp),
@@ -72,7 +73,7 @@ focusedIndicatorColor = Color.Transparent,
                 )
 
                , keyboardActions = KeyboardActions(onSearch = {onSearch(textinput)}),
-               keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
+               keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search, capitalization = KeyboardCapitalization.Characters)
            )
             IconButton(onClick = { onSearch(textinput) },modifier=Modifier) {
                 Icon(tint = Black_M,imageVector = Icons.Default.Search , contentDescription ="Search ",modifier=Modifier.size(100.dp) )

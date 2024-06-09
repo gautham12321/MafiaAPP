@@ -1,6 +1,7 @@
 package com.gautham.mafia.Network
 
 import android.util.Log
+import com.gautham.mafia.Data.Setup
 import com.mafia2.data.DoAction
 import com.mafia2.data.GameState
 import com.mafia2.data.PlayerDet
@@ -31,11 +32,12 @@ import kotlinx.serialization.json.Json
 
 interface RealTimeMessagingClient {
      val gameStateChannel: Channel<GameState>
+     val setupChannel: Channel<Setup>
     fun getGameStateStream(): Flow<GameState>
     suspend fun loadSession()
     suspend fun sendAction(action: DoAction)
     suspend fun createRoom(host:PlayerDet,gameSettings: gameSettings)
-    suspend fun joinRoom(roomId: String)
+    suspend fun joinRoom(roomId: String,userDet: PlayerDet)
     suspend fun  close()
     suspend fun findRoom(roomId: String)
     //fun testMessageStream(): Flow<String>
@@ -43,13 +45,23 @@ interface RealTimeMessagingClient {
 
 
     suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings)
+    fun getSetupStream(): Flow<Setup>
+    suspend fun sendGameSettings(id: String, value: gameSettings)
 }
 class KtorRMC( val client: HttpClient) : RealTimeMessagingClient {
      override val gameStateChannel = Channel<GameState>()
+    override val setupChannel = Channel<Setup>()
     var session: WebSocketSession?=null
 
     override fun getGameStateStream(): Flow<GameState> =gameStateChannel.consumeAsFlow()
-//CHECKCKCKCKCKCKKCKCC
+    override fun getSetupStream(): Flow<Setup> =setupChannel.consumeAsFlow()
+    override suspend fun sendGameSettings(id: String, value: gameSettings) {
+
+        val text_send = "game_Settings#${Json.encodeToString(Request(id,value))}"
+        session?.outgoing?.send(Frame.Text(text_send))
+    }
+
+    //CHECKCKCKCKCKCKKCKCC
     override suspend fun loadSession() {
     session = client.webSocketSession {
         url("ws://192.168.1.42:8080/play")
@@ -62,13 +74,22 @@ class KtorRMC( val client: HttpClient) : RealTimeMessagingClient {
         ?.mapNotNull { frame ->
             try {
                 Json.decodeFromString<GameState>(frame.readText())
+
             } catch (e: Exception) {
-                Log.e("Error", "Error decoding JSON", e)
-                null
+                try {
+                    Json.decodeFromString<Setup>(frame.readText())
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
-        ?.collect { gameState ->
-            gameStateChannel.send(gameState) // Send the GameState to the channel
+        ?.collect {
+            when{
+           it is GameState-> gameStateChannel.send(it) //ERROR PRONE
+            it is Setup -> setupChannel.send(it)
+
+        }
+
         }
 
 
@@ -95,12 +116,15 @@ class KtorRMC( val client: HttpClient) : RealTimeMessagingClient {
 
 
 
-    override suspend fun joinRoom(roomId: String) {
-        TODO("Not yet implemented")
+    override suspend fun joinRoom(roomId: String, userDet: PlayerDet) {
+        val text_send = "Join_Room#${Json.encodeToString(Request(roomId,userDet))}"
+        session?.outgoing?.send(Frame.Text(text_send))
     }
     override suspend fun findRoom(roomId: String)
     {
+
         val text_send = "Search_Room#${roomId}"
+        Log.d("send",text_send)
         session?.outgoing?.send(Frame.Text(text_send))
 
 

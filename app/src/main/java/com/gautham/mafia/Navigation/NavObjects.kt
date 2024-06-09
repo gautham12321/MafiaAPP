@@ -15,12 +15,20 @@ object CreateRoom
 @Serializable
 object JoinRoom
 {
-    val ratio:Float = 5f
+    val ratio:Float = 3f
+}
+@Serializable
+object Searching{
+
+    val ratio:Float = 11f
+    var roomId:String = ""
+
 }
 @Serializable
 object RoomFound{
 
     val ratio:Float = -6f
+    var roomId:String = ""
 }
 @Serializable
 object Lobby{

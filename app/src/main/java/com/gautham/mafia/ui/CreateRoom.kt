@@ -38,7 +38,7 @@ fun CreateRoom(
         Text(text = "GAME SETTINGS", textAlign = TextAlign.Center,style = Typography.displayLarge.copy(lineHeight = 40.sp, fontSize = 45.sp),modifier = modifier.padding(16.dp))
 
 val gameList=gameSettings.toList().toMutableList()
-        SettingsCard(modifier, gameSettings, gameList =gameList , onChange = onChange)
+        SettingsCard(modifier, gameSettings, gameList =gameList , onChange = onChange,isHost = true)
 
         IconButton(onClick = {onNavigate()},modifier = modifier.size(100.dp).offset(y = (16).dp)) {
             Icon(modifier = Modifier.size(500.dp),imageVector = Icons.Default.PlayArrow, contentDescription ="Go To Lobby", tint = Black_M )

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,8 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarData
+
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +60,8 @@ import com.mafia2.data.gameSettings
 import com.mafia2.data.toList
 
 @Composable
-fun LobbyScreen(
+fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when it is edited ,
+// it needs to be displayed on the clients phone as well(its not sending gamesettings to server as of now)
     room_id: String,
     modifier: Modifier = Modifier,
     onStart: () -> Unit = {},
@@ -101,9 +103,10 @@ fun LobbyScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .offset(y = (50).dp),
+                .offset(y = (20).dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top
         ) {
+
 
             Display_M(
                 text = room_id, modifier = modifier
@@ -118,11 +121,17 @@ fun LobbyScreen(
 
 
             }
+            Canvas(modifier = modifier.padding(start = 20.dp,end = 20.dp,top = 16.dp).height(3.dp).fillMaxWidth()) {
+                drawLine(Black_M, start = Offset(0f, 0f), end = Offset(size.width, 0f), 10f)
+
+            }
 
 
 
 
-                LazyVerticalGrid(modifier = modifier.height(500.dp).padding(horizontal = 16.dp), columns = GridCells.Adaptive(150.dp)) {
+                LazyVerticalGrid(modifier = modifier
+                    .height(500.dp)
+                    .padding(horizontal = 16.dp), columns = GridCells.Adaptive(150.dp)) {
                     items(players) {
 
                         LobbyCard(it, hostCard = (it.id == hostId) )
@@ -162,7 +171,7 @@ fun LobbyScreen(
 
                     SettingsCard(
                         modifier = modifier, settings = gameSettings,
-                        gameList = gameList.toMutableList(), onChange = onChange
+                        gameList = gameList.toMutableList(), onChange = onChange,isHost = isHost
                     )
 
             }
