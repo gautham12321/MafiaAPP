@@ -42,11 +42,13 @@ fun ProfileChangeScreen(
 
 
             Profile(
-                playerdet = playerDet.value, size = 400f, onClick = {
+                size = 400f,
+                onClick = {
                 onChange(playerDet.value.copy(avatar = getRandomAvatarImage()))
 
 
-            }, )
+            },
+                playerdet = playerDet.value, )
             Display_M(
                 modifier =
                 modifier.fillMaxWidth()

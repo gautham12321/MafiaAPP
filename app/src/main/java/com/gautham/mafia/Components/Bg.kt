@@ -24,6 +24,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.tooling.preview.Preview
+import com.gautham.mafia.Extras.GifImage
 import com.gautham.mafia.ui.theme.Black_M
 import com.gautham.mafia.ui.theme.Red_M
 import com.gautham.mafia.ui.theme.Red_M2
@@ -43,9 +44,16 @@ fun BackGroundScreen(modifier: Modifier=Modifier,ratio:Float=0f,content: @Compos
        Box(modifier=modifier.fillMaxSize()){
            content()
 
+
        }
 
     }
+
+}
+@Preview
+@Composable
+fun GifPreview(){
+    GifImage(modifier = Modifier.fillMaxSize(0.9f))
 
 }
 

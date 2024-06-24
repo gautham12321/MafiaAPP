@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gautham.mafia.Extras.shadow
@@ -37,20 +39,22 @@ fun Display_M(modifier: Modifier=Modifier,onDone:(String)->Unit={},text:String="
         mutableStateOf(text)
 
     }
-    Card(modifier = modifier.shadow(offsetY= 80.dp , borderRadius = 5.dp, blurRadius = 15.dp)
+    Card(modifier = modifier
+        .shadow(offsetY = 80.dp, borderRadius = 5.dp, blurRadius = 15.dp)
         .size(width = 250.dp, height = 70.dp)
         ) {
 
         Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .padding(5.dp)
                 .fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.Center
         ) {
             // Text(text = query)
             if(!readonly) {
 
-                Icon(
+                /*Icon(
                     tint = Black_M,
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit",
@@ -70,9 +74,9 @@ fun Display_M(modifier: Modifier=Modifier,onDone:(String)->Unit={},text:String="
                         }
                     },
                     modifier = Modifier
+
                         .weight(1f)
-                        .fillMaxSize()
-                        .height(50.dp),
+                        ,
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
@@ -81,7 +85,29 @@ fun Display_M(modifier: Modifier=Modifier,onDone:(String)->Unit={},text:String="
                     keyboardActions = KeyboardActions(onDone = { }),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
 
-                    )
+                    )*/
+                Icon(
+                    tint = Black_M,
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(5.dp)
+                )
+                BasicTextField(value = textinput.uppercase(), onValueChange = {
+                    if (it.length < 10){ textinput = it
+                        onDone(it)
+                    }
+                },
+                    textStyle =  Typography.labelMedium.copy
+                        (textAlign = TextAlign.Center),
+                    decorationBox = {
+                        innerTextField ->
+
+                       innerTextField()
+
+
+                    })
 
 
             }

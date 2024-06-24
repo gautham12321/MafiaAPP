@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import com.gautham.mafia.R
 
 val nico = FontFamily(Font(R.font.nico))
+val komiko = FontFamily(Font(R.font.komika))
 val akira = FontFamily(Font(R.font.akira))
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -25,7 +26,7 @@ val Typography = Typography(
     ),
 
     titleLarge = TextStyle(
-        fontFamily = nico,
+        fontFamily = komiko,
         fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         lineHeight = 28.sp,
@@ -39,7 +40,7 @@ val Typography = Typography(
 
     ),
     labelMedium = TextStyle(
-        fontFamily = nico,
+        fontFamily = komiko,
         fontWeight = FontWeight.Normal,
         fontSize = 30.sp,
         lineHeight = 28.sp,
@@ -53,7 +54,7 @@ val Typography = Typography(
 
     ),
     labelSmall = TextStyle(
-        fontFamily = nico,
+        fontFamily = komiko,
         fontWeight = FontWeight.Normal,
         fontSize = 20.sp,
         lineHeight = 28.sp,
@@ -68,7 +69,7 @@ val Typography = Typography(
     ),
     displaySmall = TextStyle(
         color = Color.Black,
-        fontFamily = nico,
+        fontFamily = komiko,
         fontWeight = FontWeight.Normal,
         fontSize = 30.sp,
         lineHeight = 28.sp,
@@ -98,7 +99,7 @@ val Typography = Typography(
 
     ),
     titleMedium = TextStyle(
-        fontFamily = nico,
+        fontFamily = komiko,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 28.sp,

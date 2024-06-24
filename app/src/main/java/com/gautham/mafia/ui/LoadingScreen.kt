@@ -19,7 +19,7 @@ import com.gautham.mafia.Navigation.Loading
 import com.gautham.mafia.Navigation.RoomFound
 import com.gautham.mafia.ui.theme.MafiaTheme
 import com.gautham.mafia.ui.theme.Typography
-
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun LoadingScreen(){
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,

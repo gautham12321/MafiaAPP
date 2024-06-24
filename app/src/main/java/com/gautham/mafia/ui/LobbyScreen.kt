@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -33,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +49,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Components.Display_M
 import com.gautham.mafia.Components.LobbyCard
@@ -55,9 +59,11 @@ import com.gautham.mafia.Extras.copyToClipboard
 import com.gautham.mafia.ui.theme.Black_M
 import com.gautham.mafia.ui.theme.Grey_M
 import com.gautham.mafia.ui.theme.MafiaTheme
+import com.gautham.mafia.ui.theme.Typography
 import com.mafia2.data.Player
 import com.mafia2.data.gameSettings
 import com.mafia2.data.toList
+import io.ktor.client.request.forms.formData
 
 @Composable
 fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when it is edited ,
@@ -71,6 +77,8 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
     onChange: (gameSettings) -> Unit,
     players: List<Player>,
     hostId: Int?,
+    navState: Boolean,
+    forceNav: () -> Unit,
 
     ){
     val gameList = gameSettings.toList()
@@ -80,7 +88,10 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
         no_Roles+=it.no
     }
     val context = LocalContext.current
+    if(navState){
 
+        forceNav()
+    }
     Box(modifier=modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter)
     {
 
@@ -90,14 +101,26 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
             .align(Alignment.BottomCenter)
             .offset(y = -19f.dp),
             contentAlignment = Alignment.Center){
-            if(isHost){Button_M(
+            if(isHost){
+                Button_M(size = 25.sp,
                 text = if(allPlayersJoined) "START" else "${players.size}/${gameSettings.totalP}",
                 modifier = modifier
 
-                    .fillMaxWidth(fraction = 0.9f), enabled = allPlayersJoined
+                    .fillMaxWidth(fraction = 0.9f), enabled = allPlayersJoined,
+                onClick = onStart
 
 
             )}
+            else{
+                
+                Row(modifier = modifier.padding( 15.dp).fillMaxWidth(fraction = 0.9f)){
+                    
+                    Text(text = if(allPlayersJoined)"Waiting for host to start".uppercase() else "Waiting for players".uppercase(), style = Typography.titleLarge)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    CircularProgressIndicator(modifier = Modifier.weight(1f))
+                }
+                
+            }
 
         }
         Column(
@@ -121,7 +144,10 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
 
 
             }
-            Canvas(modifier = modifier.padding(start = 20.dp,end = 20.dp,top = 16.dp).height(3.dp).fillMaxWidth()) {
+            Canvas(modifier = modifier
+                .padding(start = 20.dp, end = 20.dp, top = 16.dp)
+                .height(3.dp)
+                .fillMaxWidth()) {
                 drawLine(Black_M, start = Offset(0f, 0f), end = Offset(size.width, 0f), 10f)
 
             }

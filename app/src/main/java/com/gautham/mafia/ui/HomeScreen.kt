@@ -42,12 +42,13 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Bottom
         ) {
             Profile(
-                playerdet =playerdet.value,
                 modifier =modifier
                     .align(Alignment.End)
                     .offset(x = 170.dp, y = (-20).dp)
                     .weight(2f),
-                size = 340f, onClick = {profileChange()})
+                size = 340f,
+                onClick = {profileChange()}, playerdet =playerdet.value
+            )
             Column(modifier = modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 ) {

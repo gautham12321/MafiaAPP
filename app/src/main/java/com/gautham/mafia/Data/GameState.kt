@@ -9,7 +9,7 @@ enum class Phase{
     GAMESTARTING,
     DAY,
     NIGHT,
-    VOTING,
+  //  VOTING,
     GAMEOVER
 
 }
@@ -93,15 +93,23 @@ data class GameState(
     val toSuspect: Int? = null,
     val isSuspect: Boolean = false,
     var isVoting: Boolean = false,
-    val votersList: Map<Int, Int> = emptyMap(),
     val isGameOver: Boolean = false,
     val isWinnerMafia: Boolean = false,
     val id: String,
-    val host :Int?=null
+    val host :Int?=null,
+    val syncNav:Boolean=false,
+    val roleRevealedNo:Int=0,
+    val votedPlayersID:List<Int> = emptyList(),
 
 
 ){
 
+
+        fun getPlayerInstance(userId:Int):Player {
+
+           return players.find { it.id == userId }!!
+
+        }
 
 }
 

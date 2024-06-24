@@ -3,10 +3,16 @@
     import android.util.Log
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
+    import androidx.navigation.NavHostController
+    import com.gautham.mafia.Components.Action
     import com.gautham.mafia.Data.Setup
     import com.gautham.mafia.Extras.getRandomAvatarImage
+    import com.gautham.mafia.Navigation.GAMEOVER
+    import com.gautham.mafia.Navigation.NavObject
+    import com.gautham.mafia.Network.Errors
     import com.gautham.mafia.Network.RealTimeMessagingClient
     import com.mafia2.data.GameState
+    import com.mafia2.data.Player
     import com.mafia2.data.PlayerDet
     import com.mafia2.data.gameSettings
     import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,12 +40,17 @@
             }
 
         }
+
+        val hasVoted = MutableStateFlow(false)
+        val _hasVoted= hasVoted.asStateFlow()
         val userDetails = MutableStateFlow(PlayerDet("GAUTHAM", getRandomAvatarImage()))
         val _userDetails = userDetails.asStateFlow()
         val gameSettings = MutableStateFlow(gameSettings())
         val _gameSettings = gameSettings.asStateFlow()
        var PlayerID = MutableStateFlow(0)
         val _PlayerID = PlayerID.asStateFlow()
+        var showDetectiveResponse = MutableStateFlow(false)
+        val _showDetectiveResponse = showDetectiveResponse.asStateFlow()
         var setup = rmc.getSetupStream().onEach {setup->Log.d("SETUP",setup.toString())
             if(setup.playerDetails!= null){
                 PlayerID.update {
@@ -53,15 +64,27 @@
         }.stateIn(viewModelScope,
             SharingStarted.WhileSubscribed(5000L), Setup(false)
         )
+        var errorsFound = rmc.getErrors().onEach {
+            if(it == Errors.NETWORKERROR){
+                isConnectionError.value = true
+                Log.d("ERROR",it.toString())
+
+            }
+            else{
+                Log.d("ERROR",it.toString())
+                isConnectionError.value = false
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, Errors.ISALLFINE)
 
         var gameState =
             rmc.getGameStateStream()
                 .onStart {
                     Log.d("UPDATESTATE","INTIALIZED")
-                    isConnecting.value = true }
+                    isConnecting.value = true
+                        }
                 .onEach{
                     isConnecting.value = false
-                Log.d("UPDATESTATE",it.toString())
+                Log.d("UPDATESTATES",it.toString())
                 }
                 .catch { e ->
 
@@ -82,9 +105,10 @@
 
         var _isConnecting = isConnecting.asStateFlow()
 
-        var isConnectionError = MutableStateFlow(false)
-
-        var _isConnectionError = isConnectionError.asStateFlow()
+        var isConnectionError = MutableStateFlow(true)
+        var showGameOverScreen = MutableStateFlow(false)
+        var _showGameOverScreen = showGameOverScreen.asStateFlow()
+      //  var _isConnectionError = isConnectionError.asStateFlow()
          var isSearching = MutableStateFlow(false)
             var _isSearching = isSearching.asStateFlow()
         fun changeProfile(playerDet: PlayerDet){
@@ -149,14 +173,112 @@
         }
 
 
+
+        fun gotoLoc(navController: NavHostController, loc: NavObject, delay: Long=0) {
+            if(loc.toString().substringBefore('@')!=navController.currentBackStackEntry?.destination?.route.toString()) {
+
+               viewModelScope.launch {
+                delay(delay)
+
+                   navController.navigate(loc)
+
+                   if(loc==GAMEOVER){
+
+                       showGameOverScreen.update {
+                           true
+                       }
+                       delay(4000)
+                       showGameOverScreen.update {
+                           false
+                       }
+
+                   }
+
+               }
+            }
+
+
+        }
+
+        fun syncAllPlayers(room_id: String) {
+            viewModelScope.launch {
+                rmc.syncAllPlayers(room_id)
+            }
+
+        }
+        fun randomizeRoles(room_id: String)
+        {
+            viewModelScope.launch {
+                rmc.randomizeRoles(room_id)
+            }
+     }
         override fun onCleared() {
             super.onCleared()
             viewModelScope.launch { rmc.close() }
 
         }
 
-        fun goToLoading() {
-            TODO("Not yet implemented")
+        fun roleRevealed(id: String) {
+           viewModelScope.launch {
+               rmc.roleRevealed(id)
+
+           }
+        }
+
+        fun startGame(room_id: String) {
+            viewModelScope.launch {
+                rmc.startGame(room_id)
+            }
+
+        }
+
+        fun loadAgain() {
+            viewModelScope.launch {
+                rmc.loadSession()
+            }
+        }
+
+        fun doAction(action: Action, target: Int) {
+            viewModelScope.launch {
+
+                    rmc.doaction(action = action,roomId=gameState.value.id,player=gameState.value.players.find { it.id==_PlayerID.value },affectedPlayer=target)
+
+                if(action==Action.SUSPECT){
+                    showDetectiveResponse.update {
+                        true
+                    }
+                    delay(3000)
+                    showDetectiveResponse.update {
+                        false
+                    }
+
+
+
+
+                }
+                else if(action==Action.VOTE){
+
+                    hasVoted.update {
+                        true
+                    }
+                    }
+
+
+
+            }
+        }
+
+        fun resetGame() {
+            viewModelScope.launch {
+
+                rmc.resetGame(gameState.value.id)
+            }
+        }
+
+        fun setVotedFalse() {
+            hasVoted.update {
+                false
+            }
         }
 
 

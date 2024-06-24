@@ -2,50 +2,63 @@ package com.gautham.mafia.Navigation
 
 import kotlinx.serialization.Serializable
 import kotlin.math.truncate
-
+interface NavObject
 @Serializable
-object Home{
+object Home:NavObject{
     val ratio:Float = -2f
 }
 @Serializable
-object CreateRoom
+object CreateRoom:NavObject
 {
     val ratio:Float = -13f
 }
 @Serializable
-object JoinRoom
+object JoinRoom:NavObject
 {
     val ratio:Float = 3f
 }
 @Serializable
-object Searching{
+object Searching:NavObject{
 
     val ratio:Float = 11f
     var roomId:String = ""
 
 }
 @Serializable
-object RoomFound{
+object RoomFound:NavObject{
 
     val ratio:Float = -6f
     var roomId:String = ""
 }
 @Serializable
-object Lobby{
+object Lobby:NavObject{
 
     val ratio:Float = -8f
     var isHost = true
 
 }
 @Serializable
-object Loading{
+object Loading:NavObject{
 
-    val ratio:Float = -12f
+    val ratio:Float = 12f
 
 
 }
 @Serializable
-object ProfileChange
+object ProfileChange:NavObject
 {
     val ratio:Float = 2f
+}
+@Serializable
+object RoleReveal:NavObject{
+    val ratio:Float = 12f
+}
+@Serializable
+object MainGame:NavObject
+
+@Serializable
+object GAMEOVER:NavObject
+{
+    val ratio:Float = 12f
+
 }

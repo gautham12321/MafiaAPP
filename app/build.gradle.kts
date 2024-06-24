@@ -65,6 +65,8 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0")
 
+    implementation ("io.coil-kt:coil-compose:2.1.0")
+    implementation ("io.coil-kt:coil-gif:2.1.0")
     val ktor_vers="1.6.3"
     implementation("io.ktor:ktor-client-core:$ktor_vers")
     implementation("io.ktor:ktor-client-cio:$ktor_vers")

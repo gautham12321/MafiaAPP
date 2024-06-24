@@ -80,7 +80,7 @@ import com.gautham.mafia.ui.theme.Typography
                         .rotate(expandedRotation),
                     tint = LocalContentColor.current.copy(alpha = expandedOpacity)
                 )
-                AnimatedVisibility(visible = viewSettings,enter = fadeIn(),exit = fadeOut()) {
+                AnimatedVisibility(visible = viewSettings,enter = fadeIn(tween(500)),exit = fadeOut(tween(500))) {
                     LazyColumn(modifier = modifier
                         .align(Alignment.TopStart)
                         .fillMaxSize()

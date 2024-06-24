@@ -1,67 +1,85 @@
 package com.gautham.mafia.Components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.UiComposable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawStyle
-import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
-
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.gautham.mafia.R
-import com.gautham.mafia.ui.theme.Black_M
-import com.gautham.mafia.ui.theme.MafiaTheme
+
+import com.gautham.mafia.ui.theme.Green_M
+import com.gautham.mafia.ui.theme.Orange_M
 import com.gautham.mafia.ui.theme.Red_M2
-import com.mafia2.data.PlayerDet
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.min
-import kotlin.math.sin
+import com.mafia2.data.GameState
+import com.mafia2.data.Player
+import com.mafia2.data.Role
 
 @Composable
-fun CircularPlayers(color:Color= Red_M2, modifier: Modifier, players:List<PlayerDet>, onClick: (Int) -> Unit,content: @Composable  () -> Unit)
-{
+fun CircularPlayers(
+    color: Color = Red_M2,
+    modifier: Modifier,
+    players: List<Player>,
+    onSelectPlayer: (Player) -> Unit,
+    state: GameState,
+
+    selectedPlayer: Player?,
+    content: @Composable () -> Unit,
+
+)
+{val currentRoleTurn=state.currentRoleTurn
     val noplayers = players.size
     Box(modifier = modifier, contentAlignment = Alignment.Center){
+val radius=when{
 
+    noplayers<=6->  370f
+    noplayers<=12->410f
+    noplayers<=17->400f
+    else->410f
+
+
+
+
+}
         Canvas(modifier = Modifier.fillMaxSize()){
 
-            drawCircle(color=color,radius=when{
-
-                noplayers<=6->  370f
-                noplayers<=12->410f
-                noplayers<=17->400f
-                else->410f
-
-
-
-
-                                              }, style =  Stroke(if (noplayers>12) 100f else 150f))
+            drawCircle(color=color,radius=radius, style =  Stroke(if (noplayers>12) 100f else 150f))
 
 
 
         }
-        Image(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription ="Role" )
-        CircularLayout(players = players, onClick = {})
+        if(currentRoleTurn!=null) {
+            Image(
+                painter = painterResource(id = currentRoleTurn.Icon),
+                contentDescription = "Role", colorFilter = when (currentRoleTurn) {
+                    Role.MAFIA->{
+
+                        ColorFilter.tint(Red_M2)
+                    }
+                    Role.DOCTOR->{
+                        ColorFilter.tint(Green_M)
+
+                    }
+                    Role.DETECTIVE ->{
+
+                        ColorFilter.tint(Orange_M)
+
+                    }
+
+                    else->{null}
+                }
+           , modifier = Modifier.size(200.dp) )
+        }
+        CircularLayout(players = players, onClick = {
+            onSelectPlayer(it)
+
+        },selectedPlayer=selectedPlayer,radius=radius)
 
 
 
