@@ -34,6 +34,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.gautham.mafia.Audio.MafiaAudioViewModel
+import com.gautham.mafia.Audio.SoundCue
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Extras.SettingClass
@@ -65,8 +67,9 @@ fun MafiaApp(
     navController: NavHostController,
     viewmodel: MainViewModel,
     innerPadding: PaddingValues,
+    audioViewModel: MafiaAudioViewModel,
 
-)
+    )
 {val context = LocalContext.current
 
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
@@ -82,8 +85,9 @@ fun MafiaApp(
    val isSearching by viewmodel._isSearching.collectAsState()
 val hostPlayer = setup.hostDetails
   val  userID  by viewmodel._PlayerID.collectAsState() //Might have to opt out of the flow
+    val audioState by audioViewModel._soundState.collectAsState()
 
-   BackGroundScreen(ratio = ratioAnimator)
+    BackGroundScreen(ratio = ratioAnimator)
     {
         NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
 
@@ -97,7 +101,7 @@ val hostPlayer = setup.hostDetails
 
 
                         //navController.navigate(CreateRoom)
-                        viewmodel.gotoLoc(navController, CreateRoom)
+                          viewmodel.gotoLoc(navController, CreateRoom)
                     }, joinRoom = { navController.navigate(JoinRoom) },
                         profileChange = {
 
