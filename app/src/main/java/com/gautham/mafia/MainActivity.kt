@@ -26,8 +26,7 @@ import com.gautham.mafia.ui.MafiaApp
 import com.gautham.mafia.ui.theme.MafiaTheme
 import dagger.hilt.android.AndroidEntryPoint
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-val user_name = stringPreferencesKey("user_name")
-val image_id = intPreferencesKey("image_id")
+
 @AndroidEntryPoint
 
 class MainActivity : ComponentActivity() {

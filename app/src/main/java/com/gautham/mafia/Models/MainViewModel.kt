@@ -9,12 +9,15 @@
     import com.gautham.mafia.Audio.SoundCue
     import com.gautham.mafia.Components.Action
     import com.gautham.mafia.Data.AudioState
+    import com.gautham.mafia.Data.Avatar
     import com.gautham.mafia.Data.Setup
+    import com.gautham.mafia.Datastore.DataStoreRepository
     import com.gautham.mafia.Extras.getRandomAvatarImage
     import com.gautham.mafia.Navigation.GAMEOVER
     import com.gautham.mafia.Navigation.NavObject
     import com.gautham.mafia.Network.Errors
     import com.gautham.mafia.Network.RealTimeMessagingClient
+    import com.gautham.mafia.R
     import com.mafia2.data.GameState
     import com.mafia2.data.Player
     import com.mafia2.data.PlayerDet
@@ -34,8 +37,9 @@
     import javax.inject.Inject
 
     @HiltViewModel
-    class MainViewModel @Inject constructor(private val rmc:RealTimeMessagingClient):ViewModel()
+    class MainViewModel @Inject constructor(private val rmc:RealTimeMessagingClient,private val dataRep:DataStoreRepository):ViewModel()
     {
+        val TAG="MAINVIEWMODEL"
         init {
             viewModelScope.launch {
                 rmc.loadSession()
@@ -46,8 +50,17 @@
         }
 
 
-        val userDetails = MutableStateFlow(PlayerDet("GAUTHAM", getRandomAvatarImage()))
-        val _userDetails = userDetails.asStateFlow()
+        val userDetails =dataRep.userPrefsFlow.onStart {
+            Log.d(TAG+"USERDETAILS","INTIALIZED")
+
+        }.onEach {
+            Log.d(TAG+"USERDETAILS",it.toString())
+        }.catch {
+            Log.d(TAG+"USERDETAILS",it.toString())
+        }.stateIn(viewModelScope, SharingStarted.Eagerly,
+            PlayerDet("", Avatar(R.drawable._043232_avatar_batman_comics_hero_icon))
+        )
+
         val gameSettings = MutableStateFlow(gameSettings())
         val _gameSettings = gameSettings.asStateFlow()
        var PlayerID = MutableStateFlow(0)
@@ -117,10 +130,15 @@
             var _isSearching = isSearching.asStateFlow()
         fun changeProfile(playerDet: PlayerDet){
 
-            userDetails.update {
+           /* userDetails.update {
                 it.copy(name = playerDet.name,avatar = playerDet.avatar)
 
+            }*/
+            viewModelScope.launch {
+
+                dataRep.UpdateUserDetails(playerDet)
             }
+
 
         }
         fun createRoom(){
@@ -134,7 +152,7 @@
         }
         fun joinRoom(roomId:String) {
             viewModelScope.launch {
-                rmc.joinRoom(roomId, _userDetails.value)
+                rmc.joinRoom(roomId, userDetails.value)
                 while (isConnecting.value)
                     delay(1000)
             }

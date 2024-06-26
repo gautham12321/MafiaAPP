@@ -60,9 +60,9 @@ import com.gautham.mafia.Network.Errors
 import com.gautham.mafia.R
 import com.gautham.mafia.SearchingScreen
 import com.gautham.mafia.dataStore
-import com.gautham.mafia.image_id
+
 import com.gautham.mafia.ui.theme.Typography
-import com.gautham.mafia.user_name
+
 import com.mafia2.data.Phase
 import com.mafia2.data.PlayerDet
 import kotlinx.coroutines.delay
@@ -85,13 +85,12 @@ fun MafiaApp(
 
 
     )
-{val context = LocalContext.current
-
-
+{
+    val context = LocalContext.current
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
     val audioState by viewmodel.audiostate.collectAsState()
-    var playerDetails =  viewmodel._userDetails.collectAsState()
+    var playerDetails =  viewmodel.userDetails.collectAsState()
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
    val isConnecting by viewmodel._isConnecting.collectAsState()
