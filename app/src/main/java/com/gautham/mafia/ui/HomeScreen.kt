@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -23,7 +22,7 @@ import com.mafia2.data.PlayerDet
 
 @Composable
 fun HomeScreen(
-    playerdet: State<PlayerDet>,
+    playerdet: PlayerDet,
     modifier: Modifier=Modifier,
     profileChange:()-> Unit,
     createRoom:()-> Unit,
@@ -47,7 +46,7 @@ fun HomeScreen(
                     .offset(x = 170.dp, y = (-20).dp)
                     .weight(2f),
                 size = 340f,
-                onClick = {profileChange()}, playerdet =playerdet.value
+                onClick = {profileChange()}, playerdet =playerdet
             )
             Column(modifier = modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,

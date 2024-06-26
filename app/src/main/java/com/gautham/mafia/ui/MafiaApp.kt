@@ -20,7 +20,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,10 +65,7 @@ import com.gautham.mafia.user_name
 import com.mafia2.data.Phase
 import com.mafia2.data.PlayerDet
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 //Navigation starts here
@@ -97,13 +93,13 @@ fun MafiaApp(
 
 
     }.distinctUntilChanged().collectAsState(initial =R.drawable._043232_avatar_batman_comics_hero_icon )
-  //  val playerDetails = getPlayerDetailsStream(context =LocalContext.current,name=name,imageId=imageId)
+   val playerDetails = getPlayerDetailsStream(context =LocalContext.current,name=name,imageId=imageId)
 
 
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
     val audioState by viewmodel.audiostate.collectAsState()
-    var playerDetails =  viewmodel._userDetails.collectAsState()
+   // var playerDetails =  viewmodel._userDetails.collectAsState()
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
    val isConnecting by viewmodel._isConnecting.collectAsState()

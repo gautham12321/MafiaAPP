@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +23,7 @@ import com.mafia2.data.PlayerDet
 @Composable
 fun ProfileChangeScreen(
     modifier: Modifier = Modifier,
-    playerDet: State<PlayerDet>,
+    playerDet: PlayerDet,
     onChange: (PlayerDet) -> Unit,
     settings: List<SettingClass>
 ) {
@@ -44,20 +43,20 @@ fun ProfileChangeScreen(
             Profile(
                 size = 400f,
                 onClick = {
-                onChange(playerDet.value.copy(avatar = getRandomAvatarImage()))
+                onChange(playerDet.copy(avatar = getRandomAvatarImage()))
 
 
             },
-                playerdet = playerDet.value, )
+                playerdet = playerDet, )
             Display_M(
                 modifier =
                 modifier.fillMaxWidth()
                     .offset(y=20.dp)
                     .padding(30.dp), readonly = false,
-                text = playerDet.value.name,
+                text = playerDet.name,
                 onDone = {
 
-                    onChange(playerDet.value.copy(name = it))
+                    onChange(playerDet.copy(name = it))
 
 
 
