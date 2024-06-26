@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import com.gautham.mafia.Components.BackDialog
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.CircularPlayers
 import com.gautham.mafia.Components.Display_M
+import com.gautham.mafia.Components.EliminatedSplashScreen
 import com.gautham.mafia.Components.MainActionCard
 import com.gautham.mafia.Extras.GifImage
 import com.gautham.mafia.Models.MainViewModel
@@ -45,6 +47,7 @@ import com.mafia2.data.GameState
 import com.mafia2.data.Phase
 import com.mafia2.data.Player
 import com.mafia2.data.Role
+import kotlinx.coroutines.delay
 
 @Composable
 fun MainGamescreen(
@@ -63,13 +66,33 @@ val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
    var player = state.players.find { it.id == userID }
     var playerRole= state.RolesMap[userID]
     var isVoting=state.isVoting
-
+    var showEliminated by remember {
+        mutableStateOf(false)
+    }
     var actionTime =player!!.isAlive&&(isVoting || (state.currentPhase==Phase.NIGHT && playerRole==state.currentRoleTurn))
     val colorToPhase by animateColorAsState(if(state.currentPhase==Phase.NIGHT) Red_M else Black_M )
     val offsetText = 60.dp
     var selectedPlayer by remember { mutableStateOf<Player?>(null) }
     val hasVoted = state.votedPlayersID.contains(userID)
     Log.d("VOTE:LIST",hasVoted.toString()+":"+state.votedPlayersID)
+    LaunchedEffect(key1 = player.isAlive){
+        if(player.isAlive==false){
+            showEliminated=true
+
+
+
+        }
+        delay(5000)
+        showEliminated=false
+    }
+    AnimatedVisibility(visible = showEliminated) {
+        Dialog(onDismissRequest = { }, properties = DialogProperties(false,false,false)) {
+
+            EliminatedSplashScreen()
+        }
+
+    }
+
 
     Column(modifier=modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -184,7 +207,6 @@ val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
 
 
 }
-
 
 
 

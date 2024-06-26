@@ -1,6 +1,6 @@
 package com.gautham.mafia.ui
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -19,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -41,7 +42,6 @@ import com.gautham.mafia.Audio.SoundCue
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Data.AudioToPlay
-import com.gautham.mafia.Data.Avatar
 import com.gautham.mafia.Extras.SettingClass
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.CreateRoom
@@ -56,52 +56,34 @@ import com.gautham.mafia.Navigation.RoleReveal
 import com.gautham.mafia.Navigation.RoomFound
 import com.gautham.mafia.Navigation.Searching
 import com.gautham.mafia.Network.Errors
-import com.gautham.mafia.R
 import com.gautham.mafia.SearchingScreen
-import com.gautham.mafia.dataStore
-import com.gautham.mafia.image_id
+
 import com.gautham.mafia.ui.theme.Typography
-import com.gautham.mafia.user_name
+
 import com.mafia2.data.Phase
 import com.mafia2.data.PlayerDet
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 
 //Navigation starts here
 //Background should be used oustide navhost so that animations of background can be controlled as needed
 
 
+@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun MafiaApp(
     navController: NavHostController,
     viewmodel: MainViewModel,
     innerPadding: PaddingValues,
+    windowInsetsController: WindowInsetsControllerCompat,
 
 
     )
-{val context = LocalContext.current
-    val name by context.dataStore.data.map {
-        it[user_name] ?: "LIGMA"
-
-
-    }.distinctUntilChanged().collectAsState(initial = "LIGMA")
-
-    val imageId by context.dataStore.data.map {
-        it[image_id] ?: R.drawable._043232_avatar_batman_comics_hero_icon
-
-
-    }.distinctUntilChanged().collectAsState(initial =R.drawable._043232_avatar_batman_comics_hero_icon )
-  //  val playerDetails = getPlayerDetailsStream(context =LocalContext.current,name=name,imageId=imageId)
-
-
+{
+    val context = LocalContext.current
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
     val audioState by viewmodel.audiostate.collectAsState()
-    var playerDetails =  viewmodel._userDetails.collectAsState()
+    var playerDetails =  viewmodel.userDetails.collectAsState()
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
    val isConnecting by viewmodel._isConnecting.collectAsState()
@@ -147,8 +129,9 @@ val hostPlayer = setup.hostDetails
         NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
 
 
-            modifier = Modifier) {//Might have to change
+            modifier = Modifier.padding(/*bottom = 40.dp*/)) {//Might have to change
             composable<Home> {
+                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
                 ratio=it.toRoute<Home>().ratio
                 Box(modifier = Modifier.padding())
                 {
@@ -169,6 +152,7 @@ val hostPlayer = setup.hostDetails
 
             }
             composable<CreateRoom> {
+                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
                 ratio=it.toRoute<CreateRoom>().ratio
                 CreateRoom(gameSettings = gameSettings, onNavigate = {
                     if(noRoles==gameSettings.totalP) {
@@ -191,6 +175,7 @@ val hostPlayer = setup.hostDetails
 
             }
             composable<Lobby>{
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
                 ratio=it.toRoute<Lobby>().ratio
                 LobbyScreen(room_id = state.id,
@@ -388,15 +373,6 @@ val hostPlayer = setup.hostDetails
 
 }
 
-fun getPlayerDetailsStream(context: Context, name: String, imageId: Int): PlayerDet {
-
-
-
-    return PlayerDet(name, Avatar(imageId))
-
-
-
-}
 
 
 
