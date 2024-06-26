@@ -1,5 +1,6 @@
 package com.gautham.mafia.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -75,6 +76,7 @@ import kotlinx.coroutines.flow.map
 //Background should be used oustide navhost so that animations of background can be controlled as needed
 
 
+@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun MafiaApp(
     navController: NavHostController,
