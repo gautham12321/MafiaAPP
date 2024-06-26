@@ -13,11 +13,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 
 
@@ -41,13 +38,14 @@ class MainActivity : ComponentActivity() {
                     WindowCompat.getInsetsController(window, window.decorView)
                 windowInsetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MafiaApp(
                         navController=navController,
                         viewmodel=viewmodel,
                         innerPadding=innerPadding,
+                        windowInsetsController
 
                     )
 
