@@ -12,6 +12,7 @@
     import com.gautham.mafia.Data.Avatar
     import com.gautham.mafia.Data.Setup
     import com.gautham.mafia.Datastore.DataStoreRepository
+    import com.gautham.mafia.Extras.SettingClass
     import com.gautham.mafia.Extras.getRandomAvatarImage
     import com.gautham.mafia.Navigation.GAMEOVER
     import com.gautham.mafia.Navigation.NavObject
@@ -28,6 +29,8 @@
     import kotlinx.coroutines.flow.SharingStarted
     import kotlinx.coroutines.flow.asStateFlow
     import kotlinx.coroutines.flow.catch
+    import kotlinx.coroutines.flow.distinctUntilChanged
+    import kotlinx.coroutines.flow.first
     import kotlinx.coroutines.flow.onEach
     import kotlinx.coroutines.flow.onStart
     import kotlinx.coroutines.flow.stateIn
@@ -59,6 +62,36 @@
             Log.d(TAG+"USERDETAILS",it.toString())
         }.stateIn(viewModelScope, SharingStarted.Eagerly,
             PlayerDet("", Avatar(R.drawable._043232_avatar_batman_comics_hero_icon))
+        )
+        val Appsettings = dataRep.settingsFlow.onStart {
+            Log.d(TAG+"USERDETAILS","INTIALIZED")
+
+
+        }.distinctUntilChanged().onEach{
+            Log.d(TAG+"USERDETAILS",it.toString())
+            it.forEach {
+
+                when(it.label){
+                    dataRep.context.getString(R.string.randomAvatar)->{
+                        if(it.state){
+
+                            changeProfile(userDetails.value.copy(avatar = getRandomAvatarImage()))
+                            //Temporary solution ,wont work with multiple settings
+
+                        }
+
+                    }
+
+
+                }
+            }
+
+        }
+
+            .catch {
+            Log.d(TAG+"USERDETAILS",it.toString())
+        }.stateIn(viewModelScope, SharingStarted.Eagerly,
+           listOf(SettingClass("Loading...",false))
         )
 
         val gameSettings = MutableStateFlow(gameSettings())
@@ -341,7 +374,13 @@
 
         }
 
+        fun changeAppSetting(it: List<SettingClass>) {
+           viewModelScope.launch {
+               dataRep.UpdateSettings(it)
+           }
+            Log.d("SETTINGS","4.$it")
 
+        }
 
 
     }

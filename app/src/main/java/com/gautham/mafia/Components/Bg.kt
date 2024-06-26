@@ -73,9 +73,8 @@ var enable by remember {
         BackGroundScreen(ratio = slid )
 
 
-        switch_M(checked = enable, onCheckedChange = {
-            enable = it}
-            )
+
+
 
 
         }

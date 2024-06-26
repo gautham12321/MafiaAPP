@@ -42,7 +42,6 @@ import com.gautham.mafia.Audio.SoundCue
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Data.AudioToPlay
-import com.gautham.mafia.Extras.SettingClass
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.CreateRoom
 import com.gautham.mafia.Navigation.GAMEOVER
@@ -84,6 +83,7 @@ fun MafiaApp(
     val state by viewmodel.gameState.collectAsState()
     val audioState by viewmodel.audiostate.collectAsState()
     var playerDetails =  viewmodel.userDetails.collectAsState()
+    val appSettings= viewmodel.Appsettings.collectAsState()
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
    val isConnecting by viewmodel._isConnecting.collectAsState()
@@ -225,7 +225,8 @@ val hostPlayer = setup.hostDetails
 
 
             }
-            composable<MainGame>{
+            composable<MainGame>
+            {
                 LaunchedEffect(key1 = state.syncNav) {
 
                     if(state.syncNav==true) {
@@ -335,14 +336,17 @@ val hostPlayer = setup.hostDetails
             ){
                 ratio=it.toRoute<ProfileChange>().ratio
                 ProfileChangeScreen(
-                    settings = listOf(SettingClass("Hello"),SettingClass("Hello")),
+                    settings = appSettings,
                     playerDet =playerDetails, onChange = {
 
 
                             viewmodel.changeProfile(it)
 
 
-                    } )//empty
+                    } , onSettingChange = {
+                        viewmodel.changeAppSetting(it)
+                        Log.d("SETTINGS","3.$it")
+                    })//empty
             BackHandler {
                 navController.popBackStack(Home,false)
             }// for now

@@ -1,5 +1,6 @@
 package com.gautham.mafia.Components
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.animateDpAsState
@@ -10,7 +11,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,24 +37,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gautham.mafia.Extras.SettingClass
-import com.gautham.mafia.ui.theme.MafiaTheme
 import com.gautham.mafia.ui.theme.Typography
 
 @Composable
  fun FloatingSettings(
     modifier: Modifier=Modifier,
     fabicon:ImageVector=Icons.Default.Settings,
-    items: List<SettingClass>
-) {//get the reveal done
+    items: State<List<SettingClass>>,
+    onSettingChange:(String, Boolean)->Unit
+) {
+     //get the reveal done
         var expanded by remember { mutableStateOf(false) }
         var viewSettings by remember { mutableStateOf(false) }
     var fabsize = 100.dp
     var iconSize = 60.dp
-    val expandedH by animateDpAsState(targetValue = if(!expanded) fabsize else 500.dp,animationSpec = spring(dampingRatio = 2f),
+    val expandedH
+    by animateDpAsState(targetValue = if(!expanded) fabsize else 500.dp,animationSpec = spring(dampingRatio = 2f),
         )
     val expandedW by animateDpAsState(targetValue = if(!expanded) fabsize else 350.dp,animationSpec = spring(dampingRatio = 2f))
     val expandedOpacity by animateFloatAsState(targetValue = if(!expanded) 1f else 0.06f,animationSpec = spring(dampingRatio = 3f))
@@ -69,7 +71,7 @@ import com.gautham.mafia.ui.theme.Typography
                 .height(expandedH)
         ) {
 
-            Box (modifier = modifier.fillMaxSize()){
+            Box (modifier = Modifier.fillMaxSize()){
 
                 Icon(
                     imageVector = fabicon,
@@ -81,14 +83,22 @@ import com.gautham.mafia.ui.theme.Typography
                     tint = LocalContentColor.current.copy(alpha = expandedOpacity)
                 )
                 AnimatedVisibility(visible = viewSettings,enter = fadeIn(tween(500)),exit = fadeOut(tween(500))) {
-                    LazyColumn(modifier = modifier
+                    LazyColumn(modifier = Modifier
                         .align(Alignment.TopStart)
                         .fillMaxSize()
                         .padding(20.dp)) {
-                        items(items){
-                            Column(modifier = modifier.padding(10.dp)) {
-                                Text(text = it.label,style = Typography.labelMedium.copy(fontSize = 25.sp))
-                                switch_M(onCheckedChange = {})
+                        items(items=items.value){
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(text = it.label,style = Typography.labelMedium.copy(fontSize = 15.sp))
+                                switch_M(label = it.label,checked = it.state,onCheckedChange =
+                                {
+                                   label,state->
+
+                                    onSettingChange(label,state)
+                                    Log.d("SETTINGS","1.$label $state")
+
+
+                                })
 
                             }
 
@@ -106,19 +116,22 @@ import com.gautham.mafia.ui.theme.Typography
 
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+/*@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun FloatingSettingsPreview() {
     Box(modifier = Modifier.fillMaxSize()) {
         MafiaTheme {
             FloatingSettings(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                items = listOf(SettingClass("Daddy Undo"), SettingClass("Gay"))
+                items = listOf(SettingClass("Daddy Undo", ramdomEnabled), SettingClass(
+                    "Gay",
+                    ramdomEnabled
+                ))
             )
         }
     }
 
-    }
+    }*/
 
 //Test
 @Composable

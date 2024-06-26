@@ -1,2 +1,2 @@
 package com.gautham.mafia.Extras
-data class SettingClass(val label:String)
+data class SettingClass(val label: String, var state: Boolean)

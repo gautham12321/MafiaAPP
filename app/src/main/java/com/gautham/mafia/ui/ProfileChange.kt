@@ -1,5 +1,6 @@
 package com.gautham.mafia.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,8 @@ fun ProfileChangeScreen(
     modifier: Modifier = Modifier,
     playerDet: State<PlayerDet>,
     onChange: (PlayerDet) -> Unit,
-    settings: List<SettingClass>
+    settings: State<List<SettingClass>>,
+    onSettingChange: (List<SettingClass>) -> Unit
 ) {
 
 
@@ -65,7 +67,22 @@ fun ProfileChangeScreen(
 
 
         }
-        FloatingSettings(modifier=modifier.align(Alignment.BottomEnd), items = settings)
+        FloatingSettings(
+            modifier =modifier.padding(16.dp).align(Alignment.BottomEnd), items = settings,
+            onSettingChange =
+        {label,state->
+            val settings = settings.value.onEach {
+                if(it.label==label){
+                    it.state=state
+                }
+            }
+            onSettingChange(settings)
+            Log.d("SETTINGS","2.$label $state")
+
+
+
+        }
+        )
 
     }
 
