@@ -86,7 +86,7 @@ fun MafiaApp(
 
     )
 {val context = LocalContext.current
-    val name by context.dataStore.data.map {
+    /*val name by context.dataStore.data.map {
         it[user_name] ?: "LIGMA"
 
 
@@ -97,7 +97,7 @@ fun MafiaApp(
 
 
     }.distinctUntilChanged().collectAsState(initial =R.drawable._043232_avatar_batman_comics_hero_icon )
-  //  val playerDetails = getPlayerDetailsStream(context =LocalContext.current,name=name,imageId=imageId)
+  // val playerDetails = getPlayerDetailsStream(context =LocalContext.current,name=name,imageId=imageId)*/
 
 
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
@@ -390,7 +390,7 @@ val hostPlayer = setup.hostDetails
 
 }
 
-fun getPlayerDetailsStream(context: Context, name: String, imageId: Int): PlayerDet {
+/*fun getPlayerDetailsStream(context: Context, name: String, imageId: Int): PlayerDet {
 
 
 
@@ -398,7 +398,7 @@ fun getPlayerDetailsStream(context: Context, name: String, imageId: Int): Player
 
 
 
-}
+}*/
 
 
 
