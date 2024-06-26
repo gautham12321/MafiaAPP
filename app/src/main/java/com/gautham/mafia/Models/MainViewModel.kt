@@ -266,12 +266,7 @@
 
 
                 }
-                else if(action==Action.VOTE){
 
-                  /*  hasVoted.update {
-                        true
-                    }*/
-                    }
 
 
 
