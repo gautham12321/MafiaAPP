@@ -1,10 +1,14 @@
     package com.gautham.mafia.Models
 
+    import android.content.Context
+    import android.media.MediaPlayer
     import android.util.Log
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import androidx.navigation.NavHostController
+    import com.gautham.mafia.Audio.SoundCue
     import com.gautham.mafia.Components.Action
+    import com.gautham.mafia.Data.AudioState
     import com.gautham.mafia.Data.Setup
     import com.gautham.mafia.Extras.getRandomAvatarImage
     import com.gautham.mafia.Navigation.GAMEOVER
@@ -41,8 +45,7 @@
 
         }
 
-        val hasVoted = MutableStateFlow(false)
-        val _hasVoted= hasVoted.asStateFlow()
+
         val userDetails = MutableStateFlow(PlayerDet("GAUTHAM", getRandomAvatarImage()))
         val _userDetails = userDetails.asStateFlow()
         val gameSettings = MutableStateFlow(gameSettings())
@@ -85,6 +88,7 @@
                 .onEach{
                     isConnecting.value = false
                 Log.d("UPDATESTATES",it.toString())
+
                 }
                 .catch { e ->
 
@@ -133,6 +137,12 @@
                 rmc.joinRoom(roomId, _userDetails.value)
                 while (isConnecting.value)
                     delay(1000)
+            }
+
+        }
+        fun exitRoom(id: String) {
+            viewModelScope.launch {
+                rmc.exitRoom(id)
             }
 
         }
@@ -247,7 +257,7 @@
                     showDetectiveResponse.update {
                         true
                     }
-                    delay(3000)
+                    delay(5000)
                     showDetectiveResponse.update {
                         false
                     }
@@ -258,9 +268,9 @@
                 }
                 else if(action==Action.VOTE){
 
-                    hasVoted.update {
+                  /*  hasVoted.update {
                         true
-                    }
+                    }*/
                     }
 
 
@@ -275,11 +285,50 @@
             }
         }
 
-        fun setVotedFalse() {
+        /*fun setVotedFalse() {
             hasVoted.update {
                 false
             }
+        }*/
+        //AUDIO STARTS HERE
+        val soundState = MutableStateFlow(true)
+        val _soundState = soundState.asStateFlow()
+        var mediaPlayer: MediaPlayer?=null
+
+        var audiostate =
+            rmc.getAudioStateStream()
+                .onStart {
+                    Log.d("AUDIOSTATE","INTIALIZED")
+
+                }
+                .onEach{
+
+
+                }
+                .catch { e ->
+
+
+                }
+                .stateIn(viewModelScope,
+                    SharingStarted.WhileSubscribed(5000L), AudioState(null)
+                )
+
+
+        fun playAudio(audio: SoundCue, context: Context){
+            if(soundState.value) {
+
+                mediaPlayer = MediaPlayer.create(context, audio.sound)
+                mediaPlayer?.start()
+                mediaPlayer?.setOnCompletionListener {
+                    mediaPlayer?.release()
+                }
+            }
+
+
+
         }
+
+
 
 
     }

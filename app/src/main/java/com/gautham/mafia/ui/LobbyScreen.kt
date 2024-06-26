@@ -1,6 +1,7 @@
 package com.gautham.mafia.ui
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -50,6 +51,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.gautham.mafia.Components.BackDialog
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Components.Display_M
 import com.gautham.mafia.Components.LobbyCard
@@ -63,24 +67,30 @@ import com.gautham.mafia.ui.theme.Typography
 import com.mafia2.data.Player
 import com.mafia2.data.gameSettings
 import com.mafia2.data.toList
-import io.ktor.client.request.forms.formData
 
+@Preview(showSystemUi = true, showBackground = true, backgroundColor = 0xFF970606)
 @Composable
 fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when it is edited ,
 // it needs to be displayed on the clients phone as well(its not sending gamesettings to server as of now)
-    room_id: String,
+    room_id: String = "12345",
     modifier: Modifier = Modifier,
     onStart: () -> Unit = {},
     gameSettings: gameSettings = gameSettings(),
-    isHost: Boolean = true,
-    isConnecting: Boolean,
-    onChange: (gameSettings) -> Unit,
-    players: List<Player>,
-    hostId: Int?,
-    navState: Boolean,
-    forceNav: () -> Unit,
+    isHost: Boolean = false,
+    isConnecting: Boolean = false,
+    onChange: (gameSettings) -> Unit = {},
+    players: List<Player> = listOf(),
+    hostId: Int? = null,
+    navState: Boolean = false,
+    forceNav: () -> Unit = {},
+    onExit: () -> Unit = {},
 
-    ){
+
+){
+    var backPressed by remember {
+        mutableStateOf(false)
+    }
+
     val gameList = gameSettings.toList()
     val allPlayersJoined =players.size==gameSettings.totalP
     var no_Roles =0
@@ -113,11 +123,15 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
             )}
             else{
                 
-                Row(modifier = modifier.padding( 15.dp).fillMaxWidth(fraction = 0.9f)){
-                    
-                    Text(text = if(allPlayersJoined)"Waiting for host to start".uppercase() else "Waiting for players".uppercase(), style = Typography.titleLarge)
-                    Spacer(modifier = Modifier.width(5.dp))
-                    CircularProgressIndicator(modifier = Modifier.weight(1f))
+                Row(modifier = modifier
+                    .padding(15.dp)
+                    .fillMaxWidth(fraction = 0.9f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center){
+
+                    Text(text = if(allPlayersJoined)"Waiting for host to start".uppercase() else "Waiting for players".uppercase(), style = Typography.titleLarge.copy(fontSize = 17.sp))
+                    Spacer(modifier = Modifier.width(40.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
                 }
                 
             }
@@ -217,9 +231,25 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
             }
 
         }
+        AnimatedVisibility(visible = backPressed,modifier = Modifier.fillMaxSize(),enter = fadeIn(spring(Spring.DampingRatioNoBouncy,Spring.StiffnessLow)),) {
+            Dialog(onDismissRequest = { backPressed=false }, properties = DialogProperties(false,true,true)) {
+
+                BackDialog(onConfirm = {
+                    backPressed=false
+                    onExit()
+
+
+                })
+
+            }
+            
+        }
 
 
 
+    }
+    BackHandler {
+        backPressed=true
     }
 
 

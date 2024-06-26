@@ -8,9 +8,12 @@ import kotlinx.serialization.Serializable
 enum class Phase{
     GAMESTARTING,
     DAY,
+
     NIGHT,
+
   //  VOTING,
     GAMEOVER
+
 
 }
 enum class Role(val Icon:Int){

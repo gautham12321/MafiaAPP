@@ -2,6 +2,7 @@ package com.gautham.mafia.Network
 
 import android.util.Log
 import com.gautham.mafia.Components.Action
+import com.gautham.mafia.Data.AudioState
 import com.gautham.mafia.Data.Setup
 import com.mafia2.data.DoAction
 import com.mafia2.data.GameState
@@ -27,8 +28,10 @@ import java.net.ConnectException
 
 interface RealTimeMessagingClient {
     val gameStateChannel: Channel<GameState>
+    val audioStateChannel:Channel<AudioState>
     val setupChannel: Channel<Setup>
     fun getGameStateStream(): Flow<GameState>
+    fun getAudioStateStream():Flow<AudioState>
     suspend fun loadSession()
     suspend fun sendAction(action: DoAction)
     suspend fun createRoom(host: PlayerDet, gameSettings: gameSettings)
@@ -57,13 +60,17 @@ interface RealTimeMessagingClient {
     )
 
     suspend fun resetGame(id: String)
+    suspend fun exitRoom(id: String)
 }
     class KtorRMC(val client: HttpClient) : RealTimeMessagingClient {
         override val gameStateChannel = Channel<GameState>()
+        override val audioStateChannel: Channel<AudioState> = Channel<AudioState>()
         override val setupChannel = Channel<Setup>()
         var session: WebSocketSession? = null
         override val ExceptionChannel = Channel<Errors>()
         override fun getGameStateStream(): Flow<GameState> = gameStateChannel.consumeAsFlow()
+        override fun getAudioStateStream(): Flow<AudioState> =audioStateChannel.consumeAsFlow()
+
         override fun getSetupStream(): Flow<Setup> = setupChannel.consumeAsFlow()
        override fun getErrors() =ExceptionChannel.consumeAsFlow()
         override suspend fun doaction(
@@ -91,6 +98,10 @@ interface RealTimeMessagingClient {
 
         override suspend fun resetGame(id: String) {
             session?.outgoing?.send(Frame.Text("restartGame#${id}"))
+        }
+
+        override suspend fun exitRoom(id: String) {
+            session?.outgoing?.send(Frame.Text("ExitRoom#${id}"))
         }
 
 
@@ -124,7 +135,7 @@ interface RealTimeMessagingClient {
             Log.d("session", session.toString())
             try {
                 session = client.webSocketSession {
-                    url("ws://192.168.1.34:8081/play")
+                    url("ws://192.168.1.37:8081/play")
                 }
                 Log.d("session", session.toString())
 
@@ -143,17 +154,25 @@ interface RealTimeMessagingClient {
 
                         } catch (e: Exception) {
                             try {
-                                Json.decodeFromString<Setup>(frame.readText())
+                                Json.decodeFromString<AudioState>(frame.readText())
                             } catch (e: Exception) {
 
-                                null
+                                try {
+                                    Json.decodeFromString<Setup>(frame.readText())
+                                } catch (e: Exception) {
+
+                                    null
+                                }
                             }
                         }
                     }
                     ?.collect {
                         when {
                             it is GameState -> gameStateChannel.send(it) //ERROR PRONE
-                            it is Setup -> setupChannel.send(it)
+                            it is Setup -> {setupChannel.send(it)
+                            Log.d("SENT",it.toString())
+                            }
+                            it is AudioState -> audioStateChannel.send(it)
 
                         }
 
@@ -182,7 +201,7 @@ interface RealTimeMessagingClient {
         }
 
         override suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings) {
-            val text_send = "game_Settings#${Json.encodeToString(Request(roomId, gameSettings))}"
+            val text_send = "game_Settings#${Json.encodeToString(Request(roomId.uppercase(), gameSettings))}"
             session?.outgoing?.send(Frame.Text(text_send))
 
 
@@ -190,13 +209,13 @@ interface RealTimeMessagingClient {
 
 
         override suspend fun joinRoom(roomId: String, userDet: PlayerDet) {
-            val text_send = "Join_Room#${Json.encodeToString(Request(roomId, userDet))}"
+            val text_send = "Join_Room#${Json.encodeToString(Request(roomId.uppercase(), userDet))}"
             session?.outgoing?.send(Frame.Text(text_send))
         }
 
         override suspend fun findRoom(roomId: String) {
 
-            val text_send = "Search_Room#${roomId}"
+            val text_send = "Search_Room#${roomId.uppercase()}"
             Log.d("send", text_send)
             session?.outgoing?.send(Frame.Text(text_send))
 

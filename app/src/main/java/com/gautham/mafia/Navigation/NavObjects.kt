@@ -10,7 +10,7 @@ object Home:NavObject{
 @Serializable
 object CreateRoom:NavObject
 {
-    val ratio:Float = -13f
+    val ratio:Float = -20f
 }
 @Serializable
 object JoinRoom:NavObject
@@ -20,7 +20,7 @@ object JoinRoom:NavObject
 @Serializable
 object Searching:NavObject{
 
-    val ratio:Float = 11f
+    val ratio:Float = 20f
     var roomId:String = ""
 
 }
@@ -40,7 +40,7 @@ object Lobby:NavObject{
 @Serializable
 object Loading:NavObject{
 
-    val ratio:Float = 12f
+    val ratio:Float = 20f
 
 
 }
@@ -51,7 +51,7 @@ object ProfileChange:NavObject
 }
 @Serializable
 object RoleReveal:NavObject{
-    val ratio:Float = 12f
+    val ratio:Float = 20f
 }
 @Serializable
 object MainGame:NavObject
@@ -59,6 +59,6 @@ object MainGame:NavObject
 @Serializable
 object GAMEOVER:NavObject
 {
-    val ratio:Float = 12f
+    val ratio:Float = 20f
 
 }

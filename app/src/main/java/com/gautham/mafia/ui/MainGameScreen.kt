@@ -1,5 +1,7 @@
 package com.gautham.mafia.ui
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.gautham.mafia.Components.Action
+import com.gautham.mafia.Components.BackDialog
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.CircularPlayers
 import com.gautham.mafia.Components.Display_M
@@ -47,10 +52,12 @@ fun MainGamescreen(
     state: GameState = GameState(id = "0"),
     userID: Int,
     viewModel: MainViewModel,
+    onExit: () -> Unit,
 )
 {
+    var backpress by remember { mutableStateOf(false) }
 val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
-val hasVoted by viewModel._hasVoted.collectAsState()
+  //  val votedList = state.votedPlayersID
     //might default to voting if not voted
     var currentPhase = state.currentPhase
    var player = state.players.find { it.id == userID }
@@ -61,6 +68,8 @@ val hasVoted by viewModel._hasVoted.collectAsState()
     val colorToPhase by animateColorAsState(if(state.currentPhase==Phase.NIGHT) Red_M else Black_M )
     val offsetText = 60.dp
     var selectedPlayer by remember { mutableStateOf<Player?>(null) }
+    val hasVoted = state.votedPlayersID.contains(userID)
+    Log.d("VOTE:LIST",hasVoted.toString()+":"+state.votedPlayersID)
 
     Column(modifier=modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -74,9 +83,11 @@ val hasVoted by viewModel._hasVoted.collectAsState()
         var textToDisplay= when (state.currentPhase) {
             Phase.GAMESTARTING -> "INTIAL"
             Phase.DAY -> "DAYTIME"
+
             Phase.NIGHT -> "NIGHT"
 
             Phase.GAMEOVER -> "GAMEOVER"
+
         }
         if(state.isVoting){
             textToDisplay="VOTING !!"
@@ -95,6 +106,7 @@ val hasVoted by viewModel._hasVoted.collectAsState()
         modifier = Modifier,//.weight(1f),
         players = state.players,
         onSelectPlayer = {
+
 
             selectedPlayer = it
         }, state = state, selectedPlayer = selectedPlayer
@@ -119,8 +131,10 @@ val hasVoted by viewModel._hasVoted.collectAsState()
         AnimatedVisibility(actionTime  ) {
             MainActionCard(action = when(currentPhase){
 
-                                                      Phase.DAY-> /*if(isVoting) */Action.VOTE
+                                                      Phase.DAY->{
+                                                          /*if(isVoting) */Action.VOTE}
                 Phase.NIGHT->{
+
                     when(state.currentRoleTurn){
                         Role.MAFIA-> Action.KILL
                         Role.DETECTIVE -> Action.SUSPECT
@@ -131,10 +145,10 @@ val hasVoted by viewModel._hasVoted.collectAsState()
 
                 }
                 else-> {
-                    viewModel.setVotedFalse()
+
                     Action.VOTE
                 }
-                  },target = selectedPlayer, modifier = modifier.padding(16.dp), onDeselect = {
+                  },target = selectedPlayer,player=player, modifier = modifier.padding(16.dp), onDeselect = {
 
                 selectedPlayer=null
             }, onActionDone = {
@@ -142,6 +156,8 @@ val hasVoted by viewModel._hasVoted.collectAsState()
 
 
                 viewModel.doAction(action,target)
+                selectedPlayer=null
+
 
 
 
@@ -149,6 +165,21 @@ val hasVoted by viewModel._hasVoted.collectAsState()
 
             },hasVoted=hasVoted)
         }
+    }
+    AnimatedVisibility(visible = backpress) {
+        Dialog(onDismissRequest = { backpress=false }, properties = DialogProperties(false,true,true)) {
+
+            BackDialog(onConfirm = onExit)
+
+        }
+
+    }
+
+
+    BackHandler {
+
+        backpress=true
+
     }
 
 

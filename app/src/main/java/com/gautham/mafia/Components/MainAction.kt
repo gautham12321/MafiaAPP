@@ -44,12 +44,16 @@ fun MainActionCard(
     onActionDone: (action: Action, target: Int) -> Unit,
     action: Action = Action.VOTE,
     onDeselect: () -> Unit = {},
-    hasVoted: Boolean
+    hasVoted: Boolean,
+    player: Player
 ){
     var skipVote = false
 
 val textToDisplay=when(action){
-    Action.VOTE -> "VOTE SOMEONE OUT"
+    Action.VOTE -> {
+        "VOTE SOMEONE OUT"
+
+    }
     Action.KILL -> "SHH WHO YA KILLIN?"
     Action.SAVE -> "WHO ARE YOU SAVING?"
     Action.SUSPECT -> "WHO DO YA SUSPECT"
@@ -97,7 +101,7 @@ val textToDisplay=when(action){
 
 
                         Text(
-                            text = target.name.uppercase(),
+                            text = if(target==player) "YOU".uppercase() else target.name.uppercase(),
                             style = Typography.titleLarge.copy(fontSize = 35.sp),
                             modifier = Modifier.padding(10.dp)
                         )
@@ -121,7 +125,9 @@ val textToDisplay=when(action){
             Button(modifier = Modifier.padding(10.dp), shape = RoundedCornerShape(30),
     onClick = {
         val targetPlayer = target
-        onActionDone(action,if(!skipVote)targetPlayer!!.id else -1 )},
+        onActionDone(action,if(!skipVote)targetPlayer!!.id else -1 )
+
+              },
                 colors =ButtonDefaults.buttonColors(containerColor = buttonColor), enabled = !hasVoted && ( target!=null || action == Action.VOTE)  //might go wrong
             ){
                 Text(text = buttonText.uppercase(), color = Color.White, style = Typography.titleMedium.copy(shadow = null))
@@ -136,6 +142,7 @@ val textToDisplay=when(action){
 
 
 }
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainActionCardPreview(){
@@ -144,7 +151,8 @@ fun MainActionCardPreview(){
             target = null,
             onActionDone = { _, _ ->},
             action = Action.KILL,
-            hasVoted = false
+            hasVoted = false,
+            player = player
         )
     }
-}
+}*/

@@ -30,14 +30,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.gautham.mafia.Audio.MafiaAudioViewModel
+
 import com.gautham.mafia.Audio.SoundCue
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
+import com.gautham.mafia.Data.AudioToPlay
 import com.gautham.mafia.Extras.SettingClass
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.CreateRoom
@@ -47,6 +49,7 @@ import com.gautham.mafia.Navigation.JoinRoom
 import com.gautham.mafia.Navigation.Loading
 import com.gautham.mafia.Navigation.Lobby
 import com.gautham.mafia.Navigation.MainGame
+import com.gautham.mafia.Navigation.NavObject
 import com.gautham.mafia.Navigation.ProfileChange
 import com.gautham.mafia.Navigation.RoleReveal
 import com.gautham.mafia.Navigation.RoomFound
@@ -67,13 +70,14 @@ fun MafiaApp(
     navController: NavHostController,
     viewmodel: MainViewModel,
     innerPadding: PaddingValues,
-    audioViewModel: MafiaAudioViewModel,
+
 
     )
 {val context = LocalContext.current
 
     var ratio by remember { mutableStateOf(-7f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
+    val audioState by viewmodel.audiostate.collectAsState()
     var playerDetails =  viewmodel._userDetails.collectAsState()
     val gameSettings by viewmodel._gameSettings.collectAsState()
    val ratioAnimator by animateFloatAsState(targetValue = ratio, animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessLow))
@@ -85,10 +89,38 @@ fun MafiaApp(
    val isSearching by viewmodel._isSearching.collectAsState()
 val hostPlayer = setup.hostDetails
   val  userID  by viewmodel._PlayerID.collectAsState() //Might have to opt out of the flow
-    val audioState by audioViewModel._soundState.collectAsState()
+    val soundState by viewmodel._soundState.collectAsState()
+
+
+    LaunchedEffect(key1 = audioState) {
+        val audio= when(audioState.audioToPlay){
+            AudioToPlay.VILLAGERCLOSE -> SoundCue.VILLAGERCLOSE
+            AudioToPlay.WAKE_NODEATH ->  SoundCue.WAKE_NODEATH
+            AudioToPlay.WAKE_WITHDEATH -> SoundCue.WAKE_WITHDEATH
+            AudioToPlay.MAFIA_WAKE -> SoundCue.MAFIA_WAKE
+            AudioToPlay.MAFIA_CLOSE -> SoundCue.MAFIA_CLOSE
+            AudioToPlay.DOCTOR_WAKE ->  SoundCue.DOCTOR_WAKE
+            AudioToPlay.DOCTOR_CLOSE -> SoundCue.DOCTOR_CLOSE
+            AudioToPlay.DETECTIVE_WAKE -> SoundCue.DETECTIVE_WAKE
+            AudioToPlay.DETECTIVE_CLOSE -> SoundCue.DETECTIVE_CLOSE
+            AudioToPlay.MAFIA_WIN -> SoundCue.MAFIA_WIN
+            AudioToPlay.VILLAGER_WIN -> SoundCue.VILLAGER_WIN
+            null -> null
+            AudioToPlay.START_VOTE -> SoundCue.START_VOTE
+            AudioToPlay.VOTE_KICKED -> SoundCue.VOTE_KICK
+            AudioToPlay.VOTE_NOTKICKED -> SoundCue.SKIP_VOTE
+        }
+        if(audio!=null){
+            viewmodel.playAudio(audio,context)
+        }
+
+
+
+    }
 
     BackGroundScreen(ratio = ratioAnimator)
     {
+
         NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
 
 
@@ -146,21 +178,26 @@ val hostPlayer = setup.hostDetails
                         viewmodel.randomizeRoles(room_id = state.id)
 
                                        },
-                    isHost = it.toRoute<Lobby>().isHost,
+                    isHost = /*it.toRoute<Lobby>().isHost*/state.host==userID,
                     isConnecting = isConnecting,
-                    onChange = {settings->
+                    onChange = { settings->
                         viewmodel.changeGameSettings(settings,sendtoServer = true)
                                },
                     gameSettings = state.gameSettings,
                     players = state.players,
-                    hostId=state.host,
+                    hostId =state.host,
                     navState = state.syncNav,
-                    forceNav={
+                    forceNav ={
 
 
                             viewmodel.gotoLoc(navController, Loading, 5000)
 
+                    }, onExit = {
+                        viewmodel.exitRoom(state.id)
+                        navController.popBackStack(Home,false)
+
                     })
+
 
             }
             composable<Loading>{
@@ -168,14 +205,12 @@ val hostPlayer = setup.hostDetails
                 LoadingScreen()
                 LaunchedEffect(key1 = null) {
                     delay(3000)
-                    if(hostPlayer?.id==userID && state.currentPhase==Phase.GAMESTARTING){
 
-                        viewmodel.startGame(room_id = state.id)
-                    }
                     viewmodel.gotoLoc(navController, RoleReveal, 5000)
 
 
                 }
+                BackHandler {}
 
                 //Delay for fun
 
@@ -183,16 +218,35 @@ val hostPlayer = setup.hostDetails
 
             }
             composable<MainGame>{
+                LaunchedEffect(key1 = state.syncNav) {
+
+                    if(state.syncNav==true) {
+                        viewmodel.gotoLoc(navController, Home)
+                        viewmodel.exitRoom(state.id)
+                        Toast.makeText(context, "One or more players quit !! ", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+
+
+
                 Log.d("TEST","$hostPlayer:$userID")
                 if(state.currentPhase==Phase.GAMEOVER){
 
                     viewmodel.gotoLoc(navController, GAMEOVER)
                 }
 
-                ratio=if(state.currentPhase==Phase.NIGHT) 12f else -12f
+                ratio=if(state.currentPhase==Phase.NIGHT) 20f else -20f
 
-                MainGamescreen(state = state,userID=userID,viewModel = viewmodel)
+                MainGamescreen(state = state, userID=userID, viewModel = viewmodel,onExit = {
 
+                    viewmodel.exitRoom(state.id)
+                    navController.popBackStack(Home,false)
+
+
+                }
+                )
+                
             }
             composable<GAMEOVER>{
                 ratio=it.toRoute<GAMEOVER>().ratio
@@ -258,6 +312,10 @@ val hostPlayer = setup.hostDetails
                     }){
 
                 viewmodel.gotoLoc(navController,MainGame,delay = 5000)
+                    if(state.host==userID && state.currentPhase==Phase.GAMESTARTING){
+
+                        viewmodel.startGame(room_id = state.id)
+                    }
 
             }
             }
