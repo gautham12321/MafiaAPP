@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,6 +71,7 @@ import kotlinx.coroutines.delay
 //Background should be used oustide navhost so that animations of background can be controlled as needed
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun MafiaApp(
@@ -128,255 +132,292 @@ val hostPlayer = setup.hostDetails
     {
 
 
-        NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
+        SharedTransitionLayout(){
+            NavHost(
+                navController = navController,
+                startDestination = Home,
+                enterTransition ={
+                                 fadeIn(animationSpec = spring(Spring.DampingRatioNoBouncy,Spring.StiffnessHigh),0f)
+
+                } ,
+                exitTransition = { fadeOut(animationSpec = spring(Spring.DampingRatioNoBouncy,Spring.StiffnessHigh)) } ,
 
 
-            modifier = Modifier) {//Might have to change
-            composable<Home> {
-                 ratio=it.toRoute<Home>().ratio
-                Box(modifier = Modifier.offset(y=-30.dp))
-                {
-                    HomeScreen(createRoom = {
+                modifier = Modifier
+            ) {
+                //Might have to change
+                composable<Home> {
+                    ratio = it.toRoute<Home>().ratio
+                    Box(modifier = Modifier.offset(y = -30.dp))
+                    {
+                        HomeScreen(createRoom = {
 
 
-                        //navController.navigate(CreateRoom)
-                          viewmodel.gotoLoc(navController, CreateRoom)
-                    }, joinRoom = { navController.navigate(JoinRoom) },
-                        profileChange = {
+                            //navController.navigate(CreateRoom)
+                            viewmodel.gotoLoc(navController, CreateRoom)
+                        }, joinRoom = { navController.navigate(JoinRoom) },
+                            profileChange = {
 
-                            navController.navigate(ProfileChange)
-                        }, playerdet = playerDetails
-                    )
+                                navController.navigate(ProfileChange)
+                            }, playerdet = playerDetails,
+                            sharedScope=this@SharedTransitionLayout,
+                            animatedScope=this@composable
+                        )
+
+                    }
+
 
                 }
+                composable<CreateRoom> {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+                    ratio = it.toRoute<CreateRoom>().ratio
+                    CreateRoom(gameSettings = gameSettings, onNavigate = {
+                        if (noRoles == gameSettings.totalP) {
+                            viewmodel.createRoom()
+
+                            navController.navigate(Lobby)
+                        } else {
+
+                            Toast.makeText(
+                                context,
+                                "No of Roles does not match total players",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                        }
+
+                    }, onChange = {
+                        viewmodel.changeGameSettings(it, true)
 
 
-            }
-            composable<CreateRoom> {
-                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
-                ratio=it.toRoute<CreateRoom>().ratio
-                CreateRoom(gameSettings = gameSettings, onNavigate = {
-                    if(noRoles==gameSettings.totalP) {
-                        viewmodel.createRoom()
-
-                        navController.navigate(Lobby)
-                    }
-                    else{
-
-                        Toast.makeText(context, "No of Roles does not match total players", Toast.LENGTH_SHORT).show()
-
-                    }
-
-                }, onChange = {
-                    viewmodel.changeGameSettings(it, true)
+                    },
+                    )//formow empty for now
 
 
-                })//formow empty for now
+                }
+                composable<Lobby> {
+                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
+                    ratio = it.toRoute<Lobby>().ratio
+                    LobbyScreen(room_id = state.id,
+                        onStart = {
+                            viewmodel.resetGame()
+                            Log.d("TEST", "ONSTART CALLED")
+                            viewmodel.syncAllPlayers(room_id = state.id,)
+                            viewmodel.randomizeRoles(room_id = state.id)
 
-            }
-            composable<Lobby>{
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+                        },
+                        isHost = /*it.toRoute<Lobby>().isHost*/state.host == userID,
+                        isConnecting = isConnecting,
+                        onChange = { settings ->
+                            viewmodel.changeGameSettings(settings, sendtoServer = true)
+                        },
+                        gameSettings = state.gameSettings,
+                        players = state.players,
+                        hostId = state.host,
+                        navState = state.syncNav,
+                        forceNav = {
 
-                ratio=it.toRoute<Lobby>().ratio
-                LobbyScreen(room_id = state.id,
-                    onStart = {
-                        viewmodel.resetGame()
-                        Log.d("TEST","ONSTART CALLED")
-                        viewmodel.syncAllPlayers(room_id = state.id,)
-                        viewmodel.randomizeRoles(room_id = state.id)
-
-                                       },
-                    isHost = /*it.toRoute<Lobby>().isHost*/state.host==userID,
-                    isConnecting = isConnecting,
-                    onChange = { settings->
-                        viewmodel.changeGameSettings(settings,sendtoServer = true)
-                               },
-                    gameSettings = state.gameSettings,
-                    players = state.players,
-                    hostId =state.host,
-                    navState = state.syncNav,
-                    forceNav ={
-
-                            if(state.RolesMap.containsKey(userID) ) {
+                            if (state.RolesMap.containsKey(userID)) {
                                 viewmodel.gotoLoc(navController, Loading, 5000)
                             }
 
-                              }, onExit = {
-                        viewmodel.exitRoom(state.id)
-                        navController.popBackStack(Home,false)
+                        }, onExit = {
+                            viewmodel.exitRoom(state.id)
+                            navController.popBackStack(Home, false)
+
+                        })
+
+
+                }
+                composable<Loading> {
+                    ratio = it.toRoute<Loading>().ratio
+                    LoadingScreen()
+                    LaunchedEffect(key1 = null) {
+                        delay(3000)
+
+                        viewmodel.gotoLoc(navController, RoleReveal, 5000)
+
+
+                    }
+                    BackHandler {}
+
+                    //Delay for fun
+
+
+                }
+                composable<MainGame>
+                {
+                    LaunchedEffect(key1 = state.syncNav) {
+
+                        if (state.syncNav == true) {
+                            viewmodel.gotoLoc(navController, Home)
+                            viewmodel.exitRoom(state.id)
+                            Toast.makeText(
+                                context,
+                                "One or more players quit !! ",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    }
+
+
+
+                    Log.d("TEST", "$hostPlayer:$userID")
+                    if (state.currentPhase == Phase.GAMEOVER) {
+
+                        viewmodel.gotoLoc(navController, GAMEOVER)
+                    }
+
+                    ratio = if (state.currentPhase == Phase.NIGHT) 20f else -20f
+
+                    MainGamescreen(
+                        state = state, userID = userID, viewModel = viewmodel,
+                        onExit = {
+
+                            viewmodel.exitRoom(state.id)
+                            navController.popBackStack(Home, false)
+
+
+                        }, soundstate = soundState
+                    )
+
+                }
+                composable<GAMEOVER> {
+                    ratio = it.toRoute<GAMEOVER>().ratio
+                    GameOverScreen(
+                        navController = navController, state = state, userId = userID,
+                    )
+
+                }
+                composable<JoinRoom> {
+                    ratio = it.toRoute<JoinRoom>().ratio
+                    JoinRoom(onSearch = {
+
+                        viewmodel.searchRoom(it)
+                        navController.navigate(Searching.apply { roomId = it })
+
+                    })
+                    BackHandler {
+                        navController.popBackStack(Home, false)
+                    }
+
+                }
+                composable<Searching> {
+                    ratio = it.toRoute<Searching>().ratio
+                    var roomid = it.toRoute<Searching>().roomId
+                    SearchingScreen(navController, isSearching, setup, onNavigate = {
+
+
+                        navController.navigate(RoomFound.apply { roomId = roomid })
 
                     })
 
-
-            }
-            composable<Loading>{
-                ratio=it.toRoute<Loading>().ratio
-                LoadingScreen()
-                LaunchedEffect(key1 = null) {
-                    delay(3000)
-
-                    viewmodel.gotoLoc(navController, RoleReveal, 5000)
-
-
                 }
-                BackHandler {}
-
-                //Delay for fun
-
+                composable<RoomFound> {
+                    val roomId = it.toRoute<Searching>().roomId
 
 
-            }
-            composable<MainGame>
-            {
-                LaunchedEffect(key1 = state.syncNav) {
+                    ratio = it.toRoute<RoomFound>().ratio
+                    RoomFoundScreen(
+                        onJoinRoom = {
+                            viewmodel.joinRoom(roomId)
+                            navController.navigate(Lobby.apply { isHost = false })
 
-                    if(state.syncNav==true) {
-                        viewmodel.gotoLoc(navController, Home)
-                        viewmodel.exitRoom(state.id)
-                        Toast.makeText(context, "One or more players quit !! ", Toast.LENGTH_SHORT).show()
+                        },
+                        playerdet = PlayerDet(
+                            hostPlayer!!.name,
+                            hostPlayer.avatar
+                        )
+                    )//Might work to hide button if not host
+
+
+                    BackHandler {
+                        navController.navigate(JoinRoom)
+
                     }
 
                 }
+                composable<RoleReveal> {
 
+                    val role = state.RolesMap[userID]!!
+                    RoleRevealScreen(role = role, onRoleRevealed = {
 
+                        viewmodel.roleRevealed(state.id)
 
-                Log.d("TEST","$hostPlayer:$userID")
-                if(state.currentPhase==Phase.GAMEOVER){
+                    })
 
-                    viewmodel.gotoLoc(navController, GAMEOVER)
-                }
+                    if (with(state) {
+                            players.size == roleRevealedNo
+                        }) {
 
-                ratio=if(state.currentPhase==Phase.NIGHT) 20f else -20f
+                        viewmodel.gotoLoc(navController, MainGame, delay = 5000)
+                        if (state.host == userID && state.currentPhase == Phase.GAMESTARTING) {
 
-                MainGamescreen(
-                    state = state, userID=userID, viewModel = viewmodel,
-                    onExit = {
+                            viewmodel.startGame(room_id = state.id)
+                        }
 
-                        viewmodel.exitRoom(state.id)
-                        navController.popBackStack(Home,false)
-
-
-                    },soundstate = soundState
-                )
-                
-            }
-            composable<GAMEOVER>{
-                ratio=it.toRoute<GAMEOVER>().ratio
-                GameOverScreen(navController=navController,state=state, userId = userID,
-                 )
-
-            }
-            composable<JoinRoom> {
-                ratio=it.toRoute<JoinRoom>().ratio
-                JoinRoom(onSearch = {
-
-                    viewmodel.searchRoom(it)
-                    navController.navigate(Searching.apply { roomId=it })
-
-                })
-                BackHandler {
-                    navController.popBackStack(Home,false)
-                }
-
-            }
-            composable<Searching>{
-                ratio=it.toRoute<Searching>().ratio
-                var roomid = it.toRoute<Searching>().roomId
-                SearchingScreen(navController,isSearching,setup, onNavigate = {
-
-
-                    navController.navigate(RoomFound.apply { roomId=roomid })
-
-                })
-
-            }
-            composable<RoomFound> {
-                val roomId = it.toRoute<Searching>().roomId
-
-
-                ratio=it.toRoute<RoomFound>().ratio
-                RoomFoundScreen(onJoinRoom = {
-                    viewmodel.joinRoom(roomId)
-                    navController.navigate(Lobby.apply { isHost=false })
-
-                                             },
-                    playerdet = PlayerDet(hostPlayer!!.name,
-                    hostPlayer.avatar))//Might work to hide button if not host
-
-
-            BackHandler {
-                navController.navigate(JoinRoom)
-
-            }
-
-            }
-            composable<RoleReveal> {
-
-                val role = state.RolesMap[userID]!!
-                RoleRevealScreen(role = role, onRoleRevealed = {
-
-                    viewmodel.roleRevealed(state.id)
-
-                })
-
-                if(with(state){
-                        players.size==roleRevealedNo
-                    }){
-
-                viewmodel.gotoLoc(navController,MainGame,delay = 5000)
-                    if(state.host==userID && state.currentPhase==Phase.GAMESTARTING){
-
-                        viewmodel.startGame(room_id = state.id)
                     }
+                }
 
-            }
-            }
-
-            composable<ProfileChange> (
-                enterTransition = { slideInHorizontally() }
+                composable<ProfileChange>(
+                    enterTransition = { slideInHorizontally() }
 
 
-            ){
-                ratio=it.toRoute<ProfileChange>().ratio
-                ProfileChangeScreen(
-                    settings = appSettings,
-                    playerDet =playerDetails, onChange = {
+                ) {
+                    ratio = it.toRoute<ProfileChange>().ratio
+                    ProfileChangeScreen(
+                        settings = appSettings,
+                        playerDet = playerDetails, onChange = {
 
 
                             viewmodel.changeProfile(it)
 
 
-                    } , onSettingChange = {
-                        viewmodel.changeAppSetting(it)
-                        Log.d("SETTINGS","3.$it")
-                    },
-                onBack = {
-                    navController.popBackStack(Home,false)
+                        }, onSettingChange = {
+                            viewmodel.changeAppSetting(it)
+                            Log.d("SETTINGS", "3.$it")
+                        },
+                        onBack = {
+                            navController.popBackStack(Home, false)
 
-                })//empty
-            BackHandler {
-                navController.popBackStack(Home,false)
-            }// for now
+                        }, sharedScope=this@SharedTransitionLayout,
+                        animatedScope=this@composable)
+                    //empty
+                    BackHandler {
+                        navController.popBackStack(Home, false)
+                    }// for now
+
+                }
+
 
             }
+            if (errors == Errors.NETWORKERROR) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.8f), color = Color.Black
+                ) {
+                    Column(
+                        Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "NETWORK\nERROR",
+                            style = Typography.displayLarge.copy(
+                                color = Color.White,
+                                lineHeight = 40.sp
+                            ), textAlign = TextAlign.Center
+                        )
+                        Button_M(text = "Retry", onClick = { viewmodel.loadAgain() })
 
-
-
-        }
-        if(errors==Errors.NETWORKERROR){
-            Surface(modifier = Modifier
-                .fillMaxSize()
-                .alpha(0.8f), color = Color.Black) {
-                Column (Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
-                    Text(text = "NETWORK\nERROR",
-                        style = Typography.displayLarge.copy(color = Color.White, lineHeight = 40.sp),textAlign = TextAlign.Center)
-                    Button_M(text = "Retry", onClick = {viewmodel.loadAgain()})
+                    }
 
                 }
 
             }
-
         }
     }
 

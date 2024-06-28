@@ -1,5 +1,7 @@
 package com.gautham.mafia.ui
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,8 +27,10 @@ import com.mafia2.data.toList
 
 @Composable
 fun CreateRoom(
-    modifier: Modifier=Modifier, gameSettings: gameSettings, onNavigate:()->Unit,
-    onChange:(gameSettings)->Unit)
+    modifier: Modifier = Modifier, gameSettings: gameSettings, onNavigate: () -> Unit,
+    onChange: (gameSettings) -> Unit,
+
+)
 {//Make viewmodel and use it to change gamesettings as it is a state
 
     Column(Modifier.fillMaxSize(),

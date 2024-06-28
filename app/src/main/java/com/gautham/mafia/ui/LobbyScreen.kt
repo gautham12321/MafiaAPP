@@ -3,7 +3,10 @@ package com.gautham.mafia.ui
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -70,6 +73,7 @@ import com.mafia2.data.Player
 import com.mafia2.data.gameSettings
 import com.mafia2.data.toList
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview(showSystemUi = true, showBackground = true, backgroundColor = 0xFF970606)
 @Composable
 fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when it is edited ,
@@ -88,7 +92,8 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
     onExit: () -> Unit = {},
 
 
-){
+
+    ){
     var backPressed by remember {
         mutableStateOf(false)
     }
