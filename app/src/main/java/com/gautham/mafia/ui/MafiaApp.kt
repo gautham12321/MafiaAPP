@@ -59,6 +59,7 @@ import com.gautham.mafia.Navigation.RoleReveal
 import com.gautham.mafia.Navigation.RoomFound
 import com.gautham.mafia.Navigation.Searching
 import com.gautham.mafia.Network.Errors
+import com.gautham.mafia.Network.isInternetAvailable
 import com.gautham.mafia.SearchingScreen
 
 import com.gautham.mafia.ui.theme.Typography
@@ -393,7 +394,7 @@ val hostPlayer = setup.hostDetails
 
 
             }
-            if (errors == Errors.NETWORKERROR) {
+            if (errors == Errors.NETWORKERROR || !isInternetAvailable(context)) {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
