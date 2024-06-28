@@ -55,7 +55,8 @@ object RoleReveal:NavObject{
 }
 @Serializable
 object MainGame:NavObject
-
+@Serializable
+object splashScreen
 @Serializable
 object GAMEOVER:NavObject
 {

@@ -15,12 +15,12 @@
     import com.gautham.mafia.Extras.SettingClass
     import com.gautham.mafia.Extras.getRandomAvatarImage
     import com.gautham.mafia.Navigation.GAMEOVER
+    import com.gautham.mafia.Navigation.Home
     import com.gautham.mafia.Navigation.NavObject
     import com.gautham.mafia.Network.Errors
     import com.gautham.mafia.Network.RealTimeMessagingClient
     import com.gautham.mafia.R
     import com.mafia2.data.GameState
-    import com.mafia2.data.Player
     import com.mafia2.data.PlayerDet
     import com.mafia2.data.gameSettings
     import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +30,6 @@
     import kotlinx.coroutines.flow.asStateFlow
     import kotlinx.coroutines.flow.catch
     import kotlinx.coroutines.flow.distinctUntilChanged
-    import kotlinx.coroutines.flow.first
     import kotlinx.coroutines.flow.onEach
     import kotlinx.coroutines.flow.onStart
     import kotlinx.coroutines.flow.stateIn
@@ -388,6 +387,13 @@
             soundState.update {st->
                 it
             }
+
+        }
+
+        fun startSplashScreen(navController: NavHostController) {
+
+
+                gotoLoc(navController,Home,8000)
 
         }
 

@@ -1,6 +1,7 @@
 package com.gautham.mafia.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -45,6 +46,7 @@ import androidx.navigation.toRoute
 import com.gautham.mafia.Audio.SoundCue
 import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
+import com.gautham.mafia.Components.MafiaSplashScreen
 import com.gautham.mafia.Data.AudioToPlay
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.CreateRoom
@@ -58,6 +60,7 @@ import com.gautham.mafia.Navigation.ProfileChange
 import com.gautham.mafia.Navigation.RoleReveal
 import com.gautham.mafia.Navigation.RoomFound
 import com.gautham.mafia.Navigation.Searching
+import com.gautham.mafia.Navigation.splashScreen
 import com.gautham.mafia.Network.Errors
 import com.gautham.mafia.Network.isInternetAvailable
 import com.gautham.mafia.SearchingScreen
@@ -85,7 +88,7 @@ fun MafiaApp(
     )
 {
     val context = LocalContext.current
-    var ratio by remember { mutableStateOf(-7f) } //0f means 0f
+    var ratio by remember { mutableStateOf(20f) } //0f means 0f
     val state by viewmodel.gameState.collectAsState()
     val audioState by viewmodel.audiostate.collectAsState()
     var playerDetails =  viewmodel.userDetails.collectAsState()
@@ -136,7 +139,7 @@ val hostPlayer = setup.hostDetails
         SharedTransitionLayout(){
             NavHost(
                 navController = navController,
-                startDestination = Home,
+                startDestination = splashScreen,
                 enterTransition ={
                                  fadeIn(animationSpec = spring(Spring.DampingRatioNoBouncy,Spring.StiffnessHigh),0f)
 
@@ -146,6 +149,13 @@ val hostPlayer = setup.hostDetails
 
                 modifier = Modifier
             ) {
+                composable<splashScreen>{
+                    viewmodel.startSplashScreen(navController)
+                    MafiaSplashScreen(modifier = Modifier.fillMaxSize())
+                    BackHandler {}
+
+
+                }
                 //Might have to change
                 composable<Home> {
                     ratio = it.toRoute<Home>().ratio
@@ -164,6 +174,10 @@ val hostPlayer = setup.hostDetails
                             sharedScope=this@SharedTransitionLayout,
                             animatedScope=this@composable
                         )
+
+                    }
+                    BackHandler {
+                        signOut(context as Activity)
 
                     }
 
@@ -429,6 +443,8 @@ val hostPlayer = setup.hostDetails
 
 
 
+
+fun signOut(activity: Activity) = activity.finish()
 
 
 

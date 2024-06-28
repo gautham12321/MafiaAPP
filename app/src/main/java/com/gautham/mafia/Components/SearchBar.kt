@@ -63,7 +63,7 @@ fun searchBar_M(modifier: Modifier=Modifier,onSearch:(String)->Unit){
             horizontalArrangement = Arrangement.Absolute.SpaceBetween
             ) {
            // Text(text = query)
-           TextField(singleLine = true, textStyle = Typography.labelMedium.copy(fontSize =20.sp ),value = textinput.uppercase(),
+           TextField(singleLine = true, textStyle = Typography.labelMedium.copy(fontSize =15.sp ),value = textinput.uppercase(),
                 onValueChange = {
                                 if(it.length<= RoomID.length) textinput=it
                 },modifier= Modifier
