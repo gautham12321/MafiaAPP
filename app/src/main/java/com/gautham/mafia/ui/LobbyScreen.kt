@@ -1,5 +1,6 @@
 package com.gautham.mafia.ui
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat.startActivity
 import com.gautham.mafia.Components.BackDialog
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Components.Display_M
@@ -98,7 +100,8 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
         no_Roles+=it.no
     }
     val context = LocalContext.current
-    if(navState){
+    if(navState  ){
+
 
         forceNav()
     }
@@ -150,10 +153,16 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
                     .padding(vertical = 15.dp)
                     .fillMaxWidth(fraction = 0.9f)
             )
+            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, room_id)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
             Row (Modifier.fillMaxWidth(0.9f), horizontalArrangement = Arrangement.Absolute.SpaceAround){
 
                 ActionButton(onClick = { copyToClipboard(context,room_id) }, icon = Icons.Copy())
-                ActionButton(onClick = { /*TODO*/ })
+                ActionButton(onClick = { startActivity(context, shareIntent, null) })
                 ActionButton(onClick = {settingsVisible=true }, icon = Icons.Default.Settings)
 
 

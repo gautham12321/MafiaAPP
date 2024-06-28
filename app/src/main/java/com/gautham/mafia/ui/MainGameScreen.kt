@@ -62,48 +62,58 @@ fun MainGamescreen(
     soundstate: Boolean,
 )
 {
-    var backpress by remember { mutableStateOf(false) }
-val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
-  //  val votedList = state.votedPlayersID
-    //might default to voting if not voted
-    var currentPhase = state.currentPhase
-   var player = state.players.find { it.id == userID }
-    var playerRole= state.RolesMap[userID]
-    var isVoting=state.isVoting
-    var showEliminated by remember {
-        mutableStateOf(false)
-    }
-    var actionTime =player!!.isAlive&&(isVoting || (state.currentPhase==Phase.NIGHT && playerRole==state.currentRoleTurn))
-    val colorToPhase by animateColorAsState(if(state.currentPhase==Phase.NIGHT) Red_M else Black_M )
-    val offsetText = 60.dp
-    var selectedPlayer by remember { mutableStateOf<Player?>(null) }
-    val hasVoted = state.votedPlayersID.contains(userID)
-    Log.d("VOTE:LIST",hasVoted.toString()+":"+state.votedPlayersID)
-    LaunchedEffect(key1 = player.isAlive){
-        if(player.isAlive==false){
-            showEliminated=true
+
+        var backpress by remember { mutableStateOf(false) }
+        val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
+        //  val votedList = state.votedPlayersID
+        //might default to voting if not voted
+        var currentPhase = state.currentPhase
+        var player = state.players.find { it.id == userID }
+        var playerRole = state.RolesMap[userID]
+        var isVoting = state.isVoting
+        var showEliminated by remember {
+            mutableStateOf(false)
+        }
+        var actionTime =
+            player!!.isAlive && (isVoting || (state.currentPhase == Phase.NIGHT && playerRole == state.currentRoleTurn))
+        val colorToPhase by animateColorAsState(if (state.currentPhase == Phase.NIGHT) Red_M else Black_M)
+        val offsetText = 60.dp
+        var selectedPlayer by remember { mutableStateOf<Player?>(null) }
+        val hasVoted = state.votedPlayersID.contains(userID)
+        Log.d("VOTE:LIST", hasVoted.toString() + ":" + state.votedPlayersID)
+        LaunchedEffect(key1 = player.isAlive) {
+            if (player.isAlive == false) {
+                showEliminated = true
 
 
+            }
+            delay(5000)
+            showEliminated = false
+        }
+        AnimatedVisibility(
+            visible = showEliminated,
+            modifier = Modifier.fillMaxSize(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Dialog(onDismissRequest = { }, properties = DialogProperties(false, false, false)) {
+
+                EliminatedSplashScreen(modifier = Modifier.fillMaxSize())
+            }
 
         }
-        delay(5000)
-        showEliminated=false
-    }
-    AnimatedVisibility(visible = showEliminated, modifier = Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
-        Dialog(onDismissRequest = { }, properties = DialogProperties(false,false,false)) {
-
-            EliminatedSplashScreen(modifier = Modifier.fillMaxSize())
-        }
-
-    }
 
 
-    Column(modifier=modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top)
-    {
-        Box(modifier = modifier.weight(1f),contentAlignment = Alignment.TopCenter) {
-            soundButton(modifier = Modifier.align(Alignment.TopStart),state = soundstate)
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        )
+        {
+            soundButton(modifier = Modifier.padding(top = 50.dp),state = soundstate,onSoundChange={
+
+                viewModel.changeSound(it)
+            }, size = 30.dp)
             Text(
                 text = "DAY : ${state.day}",
                 style = Typography.displayLarge.copy(color = Color.White, shadow = null),
@@ -127,90 +137,109 @@ val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
                 style = Typography.displayMedium.copy(color = Color.White, fontFamily = akira),
                 modifier = modifier.offset(y = offsetText)
             )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-    Box(modifier = modifier.weight(1f),contentAlignment = Alignment.Center) {
-    CircularPlayers(
-        color = colorToPhase,
-        modifier = Modifier,//.weight(1f),
-        players = state.players,
-        onSelectPlayer = {
 
 
-            selectedPlayer = it
-        }, state = state, selectedPlayer = selectedPlayer
-    ) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(modifier = modifier.weight(1f), contentAlignment = Alignment.Center) {
+                CircularPlayers(
+                    color = colorToPhase,
+                    modifier = Modifier,//.weight(1f),
+                    players = state.players,
+                    onSelectPlayer = {
 
-    }
-       androidx.compose.animation.AnimatedVisibility(showDetectiveResponse){
 
-            GifImage(modifier = Modifier.fillMaxSize(), data =
+                        selectedPlayer = it
+                    }, state = state, selectedPlayer = selectedPlayer
+                ) {
 
-            if(state.isSuspect) R.drawable.thumb_sup else R.drawable.thumbsdown_office)
+                }
+                androidx.compose.animation.AnimatedVisibility(showDetectiveResponse) {
 
-        }
-    }
-        Spacer(modifier = Modifier.height(5.dp))
-        AnimatedVisibility(!actionTime && selectedPlayer!=null,modifier=Modifier.padding(16.dp))
-        {
+                    GifImage(
+                        modifier = Modifier.fillMaxSize(), data =
 
-            Display_M(modifier=Modifier.padding(16.dp),text = if(selectedPlayer==player) "YOU" else selectedPlayer!!.name)
+                        if (state.isSuspect) R.drawable.thumb_sup else R.drawable.thumbsdown_office
+                    )
 
-        }
-        AnimatedVisibility(actionTime  ) {
-            MainActionCard(action = when(currentPhase){
+                }
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+            AnimatedVisibility(
+                !actionTime && selectedPlayer != null,
+                modifier = Modifier.padding(16.dp)
+            )
+            {
 
-                                                      Phase.DAY->{
-                                                          /*if(isVoting) */Action.VOTE}
-                Phase.NIGHT->{
+                Display_M(
+                    modifier = Modifier.padding(16.dp),
+                    text = if (selectedPlayer == player) "YOU" else selectedPlayer!!.name
+                )
 
-                    when(state.currentRoleTurn){
-                        Role.MAFIA-> Action.KILL
-                        Role.DETECTIVE -> Action.SUSPECT
-                        Role.DOCTOR -> Action.SAVE
-                        else-> Action.SUSPECT
+            }
+            AnimatedVisibility(actionTime) {
+                MainActionCard(action = when (currentPhase) {
+
+                    Phase.DAY -> {
+                        /*if(isVoting) */Action.VOTE
+                    }
+
+                    Phase.NIGHT -> {
+
+                        when (state.currentRoleTurn) {
+                            Role.MAFIA -> Action.KILL
+                            Role.DETECTIVE -> Action.SUSPECT
+                            Role.DOCTOR -> Action.SAVE
+                            else -> Action.SUSPECT
+
+                        }
 
                     }
 
-                }
-                else-> {
+                    else -> {
 
-                    Action.VOTE
-                }
-                  },target = selectedPlayer,player=player, modifier = modifier.padding(16.dp), onDeselect = {
+                        Action.VOTE
+                    }
+                },
+                    target = selectedPlayer,
+                    player = player,
+                    modifier = modifier.padding(16.dp),
+                    onDeselect = {
 
-                selectedPlayer=null
-            }, onActionDone = {
-                              action,target->
+                        selectedPlayer = null
+                    },
+                    onActionDone = { action, target ->
 
 
-                viewModel.doAction(action,target)
-                selectedPlayer=null
-
-
+                        viewModel.doAction(action, target)
+                        selectedPlayer = null
 
 
 //cheyyanam
 
-            },hasVoted=hasVoted)
+                    },
+                    hasVoted = hasVoted
+                )
+            }
         }
-    }
-    AnimatedVisibility(visible = backpress) {
-        Dialog(onDismissRequest = { backpress=false }, properties = DialogProperties(false,true,true)) {
+        AnimatedVisibility(visible = backpress) {
+            Dialog(
+                onDismissRequest = { backpress = false },
+                properties = DialogProperties(false, true, true)
+            ) {
 
-            BackDialog(onConfirm = onExit)
+                BackDialog(onConfirm = onExit)
+
+            }
 
         }
 
-    }
 
+        BackHandler {
 
-    BackHandler {
+            backpress = true
 
-        backpress=true
+        }
 
-    }
 
 
 }

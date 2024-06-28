@@ -99,7 +99,7 @@ val hostPlayer = setup.hostDetails
 
 
     LaunchedEffect(key1 = audioState) {
-        val audio= when(audioState.audioToPlay){
+        val audio= when(audioState.audioToPlay  ){
             AudioToPlay.VILLAGERCLOSE -> SoundCue.VILLAGERCLOSE
             AudioToPlay.WAKE_NODEATH ->  SoundCue.WAKE_NODEATH
             AudioToPlay.WAKE_WITHDEATH -> SoundCue.WAKE_WITHDEATH
@@ -116,7 +116,7 @@ val hostPlayer = setup.hostDetails
             AudioToPlay.VOTE_KICKED -> SoundCue.VOTE_KICK
             AudioToPlay.VOTE_NOTKICKED -> SoundCue.SKIP_VOTE
         }
-        if(audio!=null){
+        if(audio!=null && (navController.currentDestination?.route == MainGame.toString() ||navController.currentDestination?.route == RoleReveal.toString())){
             viewmodel.playAudio(audio,context)
         }
 
@@ -198,10 +198,11 @@ val hostPlayer = setup.hostDetails
                     navState = state.syncNav,
                     forceNav ={
 
+                            if(state.RolesMap.containsKey(userID) ) {
+                                viewmodel.gotoLoc(navController, Loading, 5000)
+                            }
 
-                            viewmodel.gotoLoc(navController, Loading, 5000)
-
-                    }, onExit = {
+                              }, onExit = {
                         viewmodel.exitRoom(state.id)
                         navController.popBackStack(Home,false)
 

@@ -383,5 +383,13 @@
 
         }
 
+        fun changeSound(it: Boolean) {
+            mediaPlayer?.release()
+            soundState.update {st->
+                it
+            }
+
+        }
+
 
     }
