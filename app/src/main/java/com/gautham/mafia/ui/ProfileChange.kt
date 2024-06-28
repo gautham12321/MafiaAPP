@@ -8,6 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -28,7 +34,8 @@ fun ProfileChangeScreen(
     playerDet: State<PlayerDet>,
     onChange: (PlayerDet) -> Unit,
     settings: State<List<SettingClass>>,
-    onSettingChange: (List<SettingClass>) -> Unit
+    onSettingChange: (List<SettingClass>) -> Unit,
+    onBack:()->Unit
 ) {
 
 
@@ -53,8 +60,9 @@ fun ProfileChangeScreen(
                 playerdet = playerDet.value, )
             Display_M(
                 modifier =
-                modifier.fillMaxWidth()
-                    .offset(y=20.dp)
+                modifier
+                    .fillMaxWidth()
+                    .offset(y = 20.dp)
                     .padding(30.dp), readonly = false,
                 text = playerDet.value.name,
                 onDone = {
@@ -68,7 +76,9 @@ fun ProfileChangeScreen(
 
         }
         FloatingSettings(
-            modifier =modifier.padding(16.dp).align(Alignment.BottomEnd), items = settings,
+            modifier = modifier
+                .padding()
+                .align(Alignment.TopEnd), items = settings,
             onSettingChange =
         {label,state->
             val settings = settings.value.onEach {
@@ -83,6 +93,10 @@ fun ProfileChangeScreen(
 
         }
         )
+        IconButton(onClick = { onBack() },modifier=Modifier.padding(30.dp).align(Alignment.TopStart)) {
+            Icon(modifier = modifier.size(40.dp),imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription ="Go Back" )
+
+        }
 
     }
 

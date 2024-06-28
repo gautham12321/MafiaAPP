@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,7 @@ import com.gautham.mafia.Components.CircularPlayers
 import com.gautham.mafia.Components.Display_M
 import com.gautham.mafia.Components.EliminatedSplashScreen
 import com.gautham.mafia.Components.MainActionCard
+import com.gautham.mafia.Components.soundButton
 import com.gautham.mafia.Extras.GifImage
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.Loading
@@ -56,6 +59,7 @@ fun MainGamescreen(
     userID: Int,
     viewModel: MainViewModel,
     onExit: () -> Unit,
+    soundstate: Boolean,
 )
 {
     var backpress by remember { mutableStateOf(false) }
@@ -85,10 +89,10 @@ val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
         delay(5000)
         showEliminated=false
     }
-    AnimatedVisibility(visible = showEliminated) {
+    AnimatedVisibility(visible = showEliminated, modifier = Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
         Dialog(onDismissRequest = { }, properties = DialogProperties(false,false,false)) {
 
-            EliminatedSplashScreen()
+            EliminatedSplashScreen(modifier = Modifier.fillMaxSize())
         }
 
     }
@@ -98,29 +102,32 @@ val showDetectiveResponse by viewModel._showDetectiveResponse.collectAsState()
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top)
     {
+        Box(modifier = modifier.weight(1f),contentAlignment = Alignment.TopCenter) {
+            soundButton(modifier = Modifier.align(Alignment.TopStart),state = soundstate)
             Text(
                 text = "DAY : ${state.day}",
                 style = Typography.displayLarge.copy(color = Color.White, shadow = null),
                 modifier = modifier.offset(y = offsetText)
             )
-        var textToDisplay= when (state.currentPhase) {
-            Phase.GAMESTARTING -> "INTIAL"
-            Phase.DAY -> "DAYTIME"
+            var textToDisplay = when (state.currentPhase) {
+                Phase.GAMESTARTING -> "INTIAL"
+                Phase.DAY -> "DAYTIME"
 
-            Phase.NIGHT -> "NIGHT"
+                Phase.NIGHT -> "NIGHT"
 
-            Phase.GAMEOVER -> "GAMEOVER"
+                Phase.GAMEOVER -> "GAMEOVER"
 
-        }
-        if(state.isVoting){
-            textToDisplay="VOTING !!"
-            
-        }
+            }
+            if (state.isVoting) {
+                textToDisplay = "VOTING !!"
+
+            }
             Text(
                 text = textToDisplay,
                 style = Typography.displayMedium.copy(color = Color.White, fontFamily = akira),
                 modifier = modifier.offset(y = offsetText)
             )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
     Box(modifier = modifier.weight(1f),contentAlignment = Alignment.Center) {

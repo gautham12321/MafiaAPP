@@ -39,7 +39,7 @@ val TAG ="USERDATASTORE"
             emit(emptyPreferences())
 
 
-        }else{
+        }else{ Log.e(TAG, "Error FATAL.", exception)
             throw exception
         }
 

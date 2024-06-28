@@ -52,7 +52,7 @@ import com.gautham.mafia.ui.theme.Typography
      //get the reveal done
         var expanded by remember { mutableStateOf(false) }
         var viewSettings by remember { mutableStateOf(false) }
-    var fabsize = 100.dp
+    var fabsize = 50.dp
     var iconSize = 60.dp
     val expandedH
     by animateDpAsState(targetValue = if(!expanded) fabsize else 500.dp,animationSpec = spring(dampingRatio = 2f),

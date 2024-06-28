@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -126,14 +127,14 @@ val hostPlayer = setup.hostDetails
     BackGroundScreen(ratio = ratioAnimator)
     {
 
+
         NavHost(navController = navController, startDestination = Home,enterTransition = {fadeIn()},
 
 
-            modifier = Modifier.padding(/*bottom = 40.dp*/)) {//Might have to change
+            modifier = Modifier) {//Might have to change
             composable<Home> {
-                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
-                ratio=it.toRoute<Home>().ratio
-                Box(modifier = Modifier.padding())
+                 ratio=it.toRoute<Home>().ratio
+                Box(modifier = Modifier.offset(y=-30.dp))
                 {
                     HomeScreen(createRoom = {
 
@@ -247,13 +248,15 @@ val hostPlayer = setup.hostDetails
 
                 ratio=if(state.currentPhase==Phase.NIGHT) 20f else -20f
 
-                MainGamescreen(state = state, userID=userID, viewModel = viewmodel,onExit = {
+                MainGamescreen(
+                    state = state, userID=userID, viewModel = viewmodel,
+                    onExit = {
 
-                    viewmodel.exitRoom(state.id)
-                    navController.popBackStack(Home,false)
+                        viewmodel.exitRoom(state.id)
+                        navController.popBackStack(Home,false)
 
 
-                }
+                    },soundstate = soundState
                 )
                 
             }
@@ -346,7 +349,11 @@ val hostPlayer = setup.hostDetails
                     } , onSettingChange = {
                         viewmodel.changeAppSetting(it)
                         Log.d("SETTINGS","3.$it")
-                    })//empty
+                    },
+                onBack = {
+                    navController.popBackStack(Home,false)
+
+                })//empty
             BackHandler {
                 navController.popBackStack(Home,false)
             }// for now

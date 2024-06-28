@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,10 +41,10 @@ fun Button_M(text:String="Create Room",
              onClick: ()->Unit={}, colour:ButtonColors= ButtonDefaults.buttonColors(disabledContainerColor = Color.Gray), enabled:Boolean=true){
 
   Button(onClick = onClick,
-        modifier = modifier.padding(vertical = 15.dp)
+        modifier = modifier.padding(vertical = 15.dp).fillMaxWidth(0.8f)
         ,shape=shapes.medium,
         contentPadding =
-        PaddingValues(horizontal = 6.dp, vertical = 20.dp),
+        PaddingValues(horizontal = 10.dp, vertical = 10.dp),
         colors = colour, enabled = enabled
 
 

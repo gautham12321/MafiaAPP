@@ -135,7 +135,7 @@ interface RealTimeMessagingClient {
             Log.d("session", session.toString())
             try {
                 session = client.webSocketSession {
-                    url("ws://192.168.1.43:8081/play")
+                    url("ws://34.66.162.151/play")
                 }
                 Log.d("session", session.toString())
 

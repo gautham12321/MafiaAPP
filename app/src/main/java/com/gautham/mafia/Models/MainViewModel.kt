@@ -51,6 +51,7 @@
             }
 
         }
+        var statetimer=0;
 
 
         val userDetails =dataRep.userPrefsFlow.onStart {
