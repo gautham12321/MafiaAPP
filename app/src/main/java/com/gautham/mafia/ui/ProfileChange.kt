@@ -1,6 +1,9 @@
 package com.gautham.mafia.ui
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -28,6 +30,7 @@ import com.gautham.mafia.Extras.getRandomAvatarImage
 import com.mafia2.data.PlayerDet
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProfileChangeScreen(
     modifier: Modifier = Modifier,
@@ -35,7 +38,9 @@ fun ProfileChangeScreen(
     onChange: (PlayerDet) -> Unit,
     settings: State<List<SettingClass>>,
     onSettingChange: (List<SettingClass>) -> Unit,
-    onBack:()->Unit
+    onBack: () -> Unit,
+    sharedScope: SharedTransitionScope,
+    animatedScope: AnimatedContentScope
 ) {
 
 
@@ -50,15 +55,22 @@ fun ProfileChangeScreen(
         ) {
 
 
-            Profile(
-                size = 400f,
-                onClick = {
-                onChange(playerDet.value.copy(avatar = getRandomAvatarImage()))
+            with(sharedScope) {
+                Profile(
+                    size = 400f,
+                    onClick = {
+                        onChange(playerDet.value.copy(avatar = getRandomAvatarImage()))
 
 
-            },
-                playerdet = playerDet.value, )
-            Display_M(
+                    },
+                    playerdet = playerDet.value,
+                    modifier = Modifier.sharedElement(
+                        sharedScope.rememberSharedContentState(key = "profile"),
+                        animatedVisibilityScope = animatedScope
+                )
+                )
+            }
+                Display_M(
                 modifier =
                 modifier
                     .fillMaxWidth()

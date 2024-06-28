@@ -1,5 +1,8 @@
 package com.gautham.mafia.ui
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,13 +24,17 @@ import com.gautham.mafia.Components.Profile
 import com.gautham.mafia.R
 import com.mafia2.data.PlayerDet
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     playerdet: State<PlayerDet>,
-    modifier: Modifier=Modifier,
-    profileChange:()-> Unit,
-    createRoom:()-> Unit,
-    joinRoom:()->Unit)
+    modifier: Modifier = Modifier,
+    profileChange: () -> Unit,
+    createRoom: () -> Unit,
+    joinRoom: () -> Unit,
+    sharedScope: SharedTransitionScope,
+    animatedScope: AnimatedContentScope
+)
 {
 
 
@@ -41,14 +48,19 @@ fun HomeScreen(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            Profile(
-                modifier =modifier
-                    .align(Alignment.End)
-                    .offset(x = 170.dp, y = (-20).dp)
-                    .weight(2f),
-                size = 340f,
-                onClick = {profileChange()}, playerdet =playerdet.value
-            )
+            with(sharedScope) {
+                Profile(
+                    modifier = modifier
+                        .align(Alignment.End)
+                        .offset(x = 170.dp, y = (-20).dp)
+                        .weight(2f).sharedElement(
+                            sharedScope.rememberSharedContentState(key = "profile"),
+                            animatedVisibilityScope = animatedScope
+                        ),
+                    size = 340f,
+                    onClick = { profileChange() }, playerdet = playerdet.value
+                )
+            }
             Column(modifier = modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
