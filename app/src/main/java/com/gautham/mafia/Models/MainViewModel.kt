@@ -30,6 +30,7 @@
     import kotlinx.coroutines.flow.asStateFlow
     import kotlinx.coroutines.flow.catch
     import kotlinx.coroutines.flow.distinctUntilChanged
+    import kotlinx.coroutines.flow.filterNotNull
     import kotlinx.coroutines.flow.onEach
     import kotlinx.coroutines.flow.onStart
     import kotlinx.coroutines.flow.stateIn
@@ -42,33 +43,26 @@
     class MainViewModel @Inject constructor(private val rmc:RealTimeMessagingClient,private val dataRep:DataStoreRepository):ViewModel()
     {
         val TAG="MAINVIEWMODEL"
-        init {
-            viewModelScope.launch {
-                rmc.loadSession()
 
 
-            }
-
-        }
-        var statetimer=0;
 
 
         val userDetails =dataRep.userPrefsFlow.onStart {
-            Log.d(TAG+"USERDETAILS","INTIALIZED")
+            Log.d(TAG+":USERDETAILS","INTIALIZED")
 
         }.onEach {
-            Log.d(TAG+"USERDETAILS",it.toString())
+            Log.d(TAG+":USERDETAILS",it.toString())
         }.catch {
-            Log.d(TAG+"USERDETAILS",it.toString())
+            Log.d(TAG+":USERDETAILS",it.toString())
         }.stateIn(viewModelScope, SharingStarted.Eagerly,
             PlayerDet("", Avatar(R.drawable._043232_avatar_batman_comics_hero_icon))
         )
         val Appsettings = dataRep.settingsFlow.onStart {
-            Log.d(TAG+"USERDETAILS","INTIALIZED")
+            Log.d(TAG+":USERDETAILS","INTIALIZED")
 
 
         }.distinctUntilChanged().onEach{
-            Log.d(TAG+"USERDETAILS",it.toString())
+            Log.d(TAG+":USERDETAILS",it.toString())
             it.forEach {
 
                 when(it.label){
@@ -89,8 +83,8 @@
         }
 
             .catch {
-            Log.d(TAG+"USERDETAILS",it.toString())
-        }.stateIn(viewModelScope, SharingStarted.Eagerly,
+            Log.d(TAG+":USERDETAILS",it.toString())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L),
            listOf(SettingClass("Loading...",false))
         )
 
@@ -111,7 +105,7 @@
         }.catch {
             Log.d("SETUPERROR",it.toString())
         }.stateIn(viewModelScope,
-            SharingStarted.WhileSubscribed(5000L), Setup(false)
+            SharingStarted.WhileSubscribed(500L), Setup(false)
         )
         var errorsFound = rmc.getErrors().onEach {
             if(it == Errors.NETWORKERROR){
@@ -128,18 +122,20 @@
         var gameState =
             rmc.getGameStateStream()
                 .onStart {
-                    Log.d("UPDATESTATE","INTIALIZED")
+                    Log.d(TAG+":UPDATESTATE","INTIALIZED")
                     isConnecting.value = true
                         }
                 .onEach{
                     isConnecting.value = false
-                Log.d("UPDATESTATES",it.toString())
+                Log.d(TAG+":UPDATESTATES",it.toString())
 
                 }
                 .catch { e ->
-
-                    isConnectionError.value= e is ConnectException
-                }
+                    if(e is ConnectException) {
+                        isConnectionError.value = e is ConnectException
+                    }
+                    else{throw e}
+                    }
             .stateIn(viewModelScope,
             SharingStarted.WhileSubscribed(5000L), GameState(id=""))
 
@@ -204,7 +200,10 @@
                 isSearching.update { true}
 
                 rmc.findRoom(roomId)
-                delay(2000)
+                delay(3000)
+                while(setup.value.searching)
+                    delay(2000)
+
                 isSearching.update { false}
 
 
@@ -213,7 +212,7 @@
         }
 
         fun changeGameSettings(it: gameSettings, sendtoServer: Boolean=false) {
-            Log.d("UPDATE",it.toString())
+            Log.d(TAG+":UPDATE",it.toString())
             gameSettings.update {settings->
                 it
             }
@@ -344,14 +343,14 @@
         var audiostate =
             rmc.getAudioStateStream()
                 .onStart {
-                    Log.d("AUDIOSTATE","INTIALIZED")
+                    Log.d(TAG+":AUDIOSTATE","INTIALIZED")
 
                 }
                 .onEach{
-
-
+                    Log.d(TAG+":AUDIOSTATE",it.toString())
                 }
                 .catch { e ->
+                    throw e
 
 
                 }
@@ -394,6 +393,14 @@
 
 
                 gotoLoc(navController,Home,8000)
+
+        }
+        init {
+            viewModelScope.launch {
+                rmc.loadSession()
+
+
+            }
 
         }
 

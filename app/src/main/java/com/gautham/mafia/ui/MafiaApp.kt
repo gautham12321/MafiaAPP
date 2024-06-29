@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.ComponentDialog
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -48,6 +51,7 @@ import com.gautham.mafia.Components.BackGroundScreen
 import com.gautham.mafia.Components.Button_M
 import com.gautham.mafia.Components.MafiaSplashScreen
 import com.gautham.mafia.Data.AudioToPlay
+import com.gautham.mafia.MainActivity
 import com.gautham.mafia.Models.MainViewModel
 import com.gautham.mafia.Navigation.CreateRoom
 import com.gautham.mafia.Navigation.GAMEOVER
@@ -70,6 +74,7 @@ import com.gautham.mafia.ui.theme.Typography
 import com.mafia2.data.Phase
 import com.mafia2.data.PlayerDet
 import kotlinx.coroutines.delay
+import kotlin.system.exitProcess
 
 //Navigation starts here
 //Background should be used oustide navhost so that animations of background can be controlled as needed
@@ -124,7 +129,9 @@ val hostPlayer = setup.hostDetails
             AudioToPlay.VOTE_KICKED -> SoundCue.VOTE_KICK
             AudioToPlay.VOTE_NOTKICKED -> SoundCue.SKIP_VOTE
         }
-        if(audio!=null && (navController.currentDestination?.route == MainGame.toString() ||navController.currentDestination?.route == RoleReveal.toString())){
+        if(audio!=null && (navController.currentBackStackEntry?.destination?.route.toString() == MainGame.toString().substringBefore('@')
+                    ||navController.currentBackStackEntry?.destination?.route.toString() == RoleReveal.toString().substringBefore('@')
+            ||navController.currentBackStackEntry?.destination?.route.toString() == GAMEOVER.toString().substringBefore('@'))){
             viewmodel.playAudio(audio,context)
         }
 
@@ -177,14 +184,16 @@ val hostPlayer = setup.hostDetails
 
                     }
                     BackHandler {
-                        signOut(context as Activity)
-
+                        val activity: MainActivity = MainActivity()
+                        // on below line we are finishing activity.
+                        activity.finish()
+                        exitProcess(0)
                     }
 
 
                 }
                 composable<CreateRoom> {
-                    windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+
                     ratio = it.toRoute<CreateRoom>().ratio
                     CreateRoom(gameSettings = gameSettings, onNavigate = {
                         if (noRoles == gameSettings.totalP) {
@@ -247,8 +256,13 @@ val hostPlayer = setup.hostDetails
                 }
                 composable<Loading> {
                     ratio = it.toRoute<Loading>().ratio
+                    if(state.RolesMap.isNullOrEmpty() || !state.RolesMap.containsKey(userID)){
+
+                        navController.popBackStack(Lobby,false)
+                    }
                     LoadingScreen()
                     LaunchedEffect(key1 = null) {
+
                         delay(3000)
 
                         viewmodel.gotoLoc(navController, RoleReveal, 5000)

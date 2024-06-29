@@ -28,20 +28,18 @@ import java.net.ConnectException
 
 interface RealTimeMessagingClient {
     val gameStateChannel: Channel<GameState>
-    val audioStateChannel:Channel<AudioState>
+    val audioStateChannel: Channel<AudioState>
     val setupChannel: Channel<Setup>
     fun getGameStateStream(): Flow<GameState>
-    fun getAudioStateStream():Flow<AudioState>
+    fun getAudioStateStream(): Flow<AudioState>
     suspend fun loadSession()
     suspend fun sendAction(action: DoAction)
     suspend fun createRoom(host: PlayerDet, gameSettings: gameSettings)
     suspend fun joinRoom(roomId: String, userDet: PlayerDet)
     suspend fun close()
     suspend fun findRoom(roomId: String)
-    //fun testMessageStream(): Flow<String>
-    //  fun getRoomSearchStream(): Flow<Boolean>
-
-
+    // fun testMessageStream(): Flow<String>
+    // fun getRoomSearchStream(): Flow<Boolean>
     suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings)
     fun getSetupStream(): Flow<Setup>
     suspend fun sendGameSettings(id: String, value: gameSettings)
@@ -54,198 +52,174 @@ interface RealTimeMessagingClient {
     suspend fun doaction(
         action: Action,
         roomId: String,
-
         affectedPlayer: Int,
         player: Player?
     )
-
     suspend fun resetGame(id: String)
     suspend fun exitRoom(id: String)
 }
-    class KtorRMC(val client: HttpClient) : RealTimeMessagingClient {
-        override val gameStateChannel = Channel<GameState>()
-        override val audioStateChannel: Channel<AudioState> = Channel<AudioState>()
-        override val setupChannel = Channel<Setup>()
-        var session: WebSocketSession? = null
-        override val ExceptionChannel = Channel<Errors>()
-        override fun getGameStateStream(): Flow<GameState> = gameStateChannel.consumeAsFlow()
-        override fun getAudioStateStream(): Flow<AudioState> =audioStateChannel.consumeAsFlow()
 
-        override fun getSetupStream(): Flow<Setup> = setupChannel.consumeAsFlow()
-       override fun getErrors() =ExceptionChannel.consumeAsFlow()
-        override suspend fun doaction(
-            action: Action,
-            roomId: String,
-            affectedPlayer: Int,
-            player: Player?
-        ) {
-            var text_send = ""
-            val doAction:DoAction=DoAction(player!!,affectedPlayer)
-            val request=Json.encodeToString(Request(roomId,doAction))
-            if(action==Action.VOTE){
-                text_send="vote#${request}"
+class KtorRMC(val client: HttpClient) : RealTimeMessagingClient {
+    override val gameStateChannel = Channel<GameState>()
+    override val audioStateChannel: Channel<AudioState> = Channel<AudioState>()
+    override val setupChannel = Channel<Setup>()
+    var session: WebSocketSession? = null
+    override val ExceptionChannel = Channel<Errors>()
 
+    override fun getGameStateStream(): Flow<GameState> = gameStateChannel.consumeAsFlow()
+    override fun getAudioStateStream(): Flow<AudioState> = audioStateChannel.consumeAsFlow()
+    override fun getSetupStream(): Flow<Setup> = setupChannel.consumeAsFlow()
+    override fun getErrors() = ExceptionChannel.consumeAsFlow()
 
-            }
-            else{
-
-            text_send="role_action#${request}"
-
-            }
-            Log.d("DOACTION", text_send)
-            session?.outgoing?.send(Frame.Text(text_send))
-        }
-
-        override suspend fun resetGame(id: String) {
-            session?.outgoing?.send(Frame.Text("restartGame#${id}"))
-        }
-
-        override suspend fun exitRoom(id: String) {
-            session?.outgoing?.send(Frame.Text("ExitRoom#${id}"))
-        }
-
-
-        override suspend fun sendGameSettings(id: String, value: gameSettings) {
-
-            val text_send = "game_Settings#${Json.encodeToString(Request(id, value))}"
-            session?.outgoing?.send(Frame.Text(text_send))
-        }
-
-        override suspend fun syncAllPlayers(roomId: String) {
-            val text_send = "Sync_Players#${roomId}"
-            session?.outgoing?.send(Frame.Text(text_send))
-        }
-
-        override suspend fun randomizeRoles(roomId: String) {
-            val text_send = "randomize_roles#${roomId}"
-            session?.outgoing?.send(Frame.Text(text_send))
-        }
-
-        override suspend fun roleRevealed(id: String) {
-            session?.outgoing?.send(Frame.Text("Role_Revealed#${id}"))
-        }
-
-        override suspend fun startGame(roomId: String) {
-            session?.outgoing?.send(Frame.Text("start_game#${roomId}"))
-        }
-
-
-        //CHECKCKCKCKCKCKKCKCC
-        override suspend fun loadSession() {
-            Log.d("session", session.toString())
-            try {
-                session = client.webSocketSession {
-                    url("ws://34.47.132.185/play")
-                }
-                Log.d("session", session.toString())
-
-
-
-
-
-
-                ExceptionChannel.send(Errors.ISALLFINE)
-                session?.incoming
-                    ?.consumeAsFlow()
-                    ?.filterIsInstance<Frame.Text>()
-                    ?.mapNotNull { frame ->
-                        try {
-                            Json.decodeFromString<GameState>(frame.readText())
-
-                        } catch (e: Exception) {
-                            try {
-                                Json.decodeFromString<AudioState>(frame.readText())
-                            } catch (e: Exception) {
-
-                                try {
-                                    Json.decodeFromString<Setup>(frame.readText())
-                                } catch (e: Exception) {
-
-                                    null
-                                }
-                            }
-                        }
-                    }
-                    ?.collect {
-                        when {
-                            it is GameState -> gameStateChannel.send(it) //ERROR PRONE
-                            it is Setup -> {setupChannel.send(it)
-                            Log.d("SENT",it.toString())
-                            }
-                            it is AudioState -> audioStateChannel.send(it)
-
-                        }
-
-                    }
-            } catch (e: ConnectException) {
-            Log.e("loadSession", "Network is unreachable", e)
-            ExceptionChannel.send(Errors.NETWORKERROR)
-        } catch (e: Exception) {
-            Log.e("loadSession", "An error occurred", e)
-            ExceptionChannel.send(Errors.NETWORKERROR)
-        }
-
-
-
-        }
-
-        override suspend fun sendAction(action: DoAction) {
-            session?.outgoing?.send(Frame.Text("make_turn#${Json.encodeToString(action)}"))
-        }
-
-        override suspend fun createRoom(host: PlayerDet, gameSettings: gameSettings) {
-            val text_send = "Create_Room#${Json.encodeToString(host)}"
-
-            session?.outgoing?.send(Frame.Text(text_send))
-
-        }
-
-        override suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings) {
-            val text_send = "game_Settings#${Json.encodeToString(Request(roomId.uppercase(), gameSettings))}"
-            session?.outgoing?.send(Frame.Text(text_send))
-
-
-        }
-
-
-        override suspend fun joinRoom(roomId: String, userDet: PlayerDet) {
-            val text_send = "Join_Room#${Json.encodeToString(Request(roomId.uppercase(), userDet))}"
-            session?.outgoing?.send(Frame.Text(text_send))
-        }
-
-        override suspend fun findRoom(roomId: String) {
-
-            val text_send = "Search_Room#${roomId.uppercase()}"
-            Log.d("send", text_send)
-            session?.outgoing?.send(Frame.Text(text_send))
-
-
-        }
-//tests
-
-
-        /* override fun getRoomSearchStream(): Flow<Boolean> {
-         return flow {
-             val existance=session!!.incoming.consumeAsFlow().filterIsInstance<Frame.Text>().mapNotNull {
-                 if (it.readText() == "true") {
-                     true
-                 } else {
-                     false
-                 }
-             }
-             emitAll(existance)
-         }
-
-
-
-
-     }*/
-//CLOSE
-
-        override suspend fun close() {
-            session?.close()
-            session = null
-        }
-
+    private fun logMessage(tag: String, message: String) {
+        Log.d(tag, message)
     }
 
+    override suspend fun doaction(
+        action: Action,
+        roomId: String,
+        affectedPlayer: Int,
+        player: Player?
+    ) {
+        val textSend: String
+        val doAction = DoAction(player!!, affectedPlayer)
+        val request = Json.encodeToString(Request(roomId, doAction))
+        textSend = if (action == Action.VOTE) {
+            "vote#$request"
+        } else {
+            "role_action#$request"
+        }
+        logMessage("DOACTION", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun resetGame(id: String) {
+        val textSend = "restartGame#$id"
+        logMessage("RESET_GAME", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun exitRoom(id: String) {
+        val textSend = "ExitRoom#$id"
+        logMessage("EXIT_ROOM", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun sendGameSettings(id: String, value: gameSettings) {
+        val textSend = "game_Settings#${Json.encodeToString(Request(id, value))}"
+        logMessage("SEND_GAME_SETTINGS", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun syncAllPlayers(roomId: String) {
+        val textSend = "Sync_Players#$roomId"
+        logMessage("SYNC_ALL_PLAYERS", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun randomizeRoles(roomId: String) {
+        val textSend = "randomize_roles#$roomId"
+        logMessage("RANDOMIZE_ROLES", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun roleRevealed(id: String) {
+        val textSend = "Role_Revealed#$id"
+        logMessage("ROLE_REVEALED", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun startGame(roomId: String) {
+        val textSend = "start_game#$roomId"
+        logMessage("START_GAME", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun loadSession() {
+        logMessage("LOAD_SESSION", session.toString())
+        try {
+            session = client.webSocketSession {
+                url("ws://34.47.132.185/play")
+            }
+            logMessage("LOAD_SESSION", session.toString())
+
+            ExceptionChannel.send(Errors.ISALLFINE)
+            session?.incoming
+                ?.consumeAsFlow()
+                ?.filterIsInstance<Frame.Text>()
+                ?.mapNotNull { frame ->
+                    try {
+                        Json.decodeFromString<GameState>(frame.readText())
+                    } catch (e: Exception) {
+                        try {
+                            Json.decodeFromString<AudioState>(frame.readText())
+                        } catch (e: Exception) {
+                            try {
+                                Json.decodeFromString<Setup>(frame.readText())
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                    }
+                }
+                ?.collect {
+                    when (it) {
+                        is GameState ->{ gameStateChannel.send(it)
+                            logMessage("Recieved_State", it.toString())
+
+                        }
+                        is Setup -> {
+                            setupChannel.send(it)
+                            logMessage("Recieved_Setup", it.toString())
+                        }
+                        is AudioState -> {
+                            audioStateChannel.send(it)
+                            logMessage("Recieved_AudioState", it.toString())
+                        }
+                        }
+                }
+        } catch (e: ConnectException) {
+            logMessage("LOAD_SESSION", "Network is unreachable: ${e.message}")
+            ExceptionChannel.send(Errors.NETWORKERROR)
+        } catch (e: Exception) {
+            logMessage("LOAD_SESSION", "An error occurred: ${e.message}")
+            ExceptionChannel.send(Errors.NETWORKERROR)
+        }
+    }
+
+    override suspend fun sendAction(action: DoAction) {
+        val textSend = "make_turn#${Json.encodeToString(action)}"
+        logMessage("SEND_ACTION", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun createRoom(host: PlayerDet, gameSettings: gameSettings) {
+        val textSend = "Create_Room#${Json.encodeToString(host)}"
+        logMessage("CREATE_ROOM", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun updateGameSetting(roomId: String, gameSettings: gameSettings) {
+        val textSend = "game_Settings#${Json.encodeToString(Request(roomId.uppercase(), gameSettings))}"
+        logMessage("UPDATE_GAME_SETTING", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun joinRoom(roomId: String, userDet: PlayerDet) {
+        val textSend = "Join_Room#${Json.encodeToString(Request(roomId.uppercase(), userDet))}"
+        logMessage("JOIN_ROOM", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun findRoom(roomId: String)
+    {
+        val textSend = "Search_Room#${roomId.uppercase()}"
+        logMessage("FIND_ROOM", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun close() {
+        session?.close()
+        session = null
+    }
+}

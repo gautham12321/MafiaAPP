@@ -25,6 +25,7 @@ import com.gautham.mafia.Navigation.JoinRoom
 import com.gautham.mafia.Navigation.RoomFound
 import com.gautham.mafia.ui.theme.Typography
 import com.gautham.mafia.ui.theme.akira
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -35,34 +36,37 @@ fun SearchingScreen(navController: NavHostController,
    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment  = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
 
-        Text(text = "Searching for room", style = Typography.displayMedium.copy(fontFamily = akira,color = Color.White, textAlign = TextAlign.Center, lineHeight = 50.sp), modifier = Modifier.padding(16.dp))
+        Text(text = "Searching for room", style = Typography.displayMedium.copy(fontFamily = akira,color = Color.White, textAlign = TextAlign.Center, fontSize = 35.sp, lineHeight = 50.sp), modifier = Modifier.padding(16.dp))
         CircularProgressIndicator()
 
 
     }
-    if(isSearching==false)
-    {
-        LaunchedEffect(key1 = setup.roomFound) {
-            if(setup.roomFound==false) {
+    Log.d("SearchingScreen", "SearchingScreen: $isSearching")
+    LaunchedEffect(key1 = isSearching) {
+        while(isSearching==true)
+        {
+            delay(1000)}
+            if(!setup.roomFound){
+               Log.d ("NAV","${navController.popBackStack(JoinRoom,false)}")
                 Toast.makeText(context, "Room Not Found", Toast.LENGTH_SHORT).show()
+
+
+
             }
-        }
-        if(setup.roomFound){
-            if(RoomFound.toString().substringBefore('@')!=navController.currentBackStackEntry?.destination?.route.toString()){
-
-                     onNavigate()
-            }
-
-
-
-        }
         else{
-
-
-            navController.popBackStack(JoinRoom,false)
+           onNavigate()
 
         }
 
 
     }
+
+
+
+
+
+
+
+
+
     }

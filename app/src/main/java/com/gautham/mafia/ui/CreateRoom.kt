@@ -39,7 +39,7 @@ fun CreateRoom(
         )
 
     {
-        Text(text = "GAME SETTINGS", textAlign = TextAlign.Center,style = Typography.displayLarge.copy(lineHeight = 40.sp, fontSize = 45.sp),modifier = modifier.padding(16.dp))
+        Text(text = "GAME SETTINGS", textAlign = TextAlign.Center,style = Typography.displayLarge.copy(lineHeight = 30.sp, fontSize = 35.sp),modifier = modifier.padding(16.dp))
 
 val gameList=gameSettings.toList().toMutableList()
         SettingsCard(modifier, gameSettings, gameList =gameList , onChange = onChange,isHost = true)

@@ -61,7 +61,7 @@ fun gameSettings.toList():List<RoleInfo>{
         RoleInfo(Role.DOCTOR,noDoctor),
         RoleInfo(Role.MAFIA,noMafia),
         RoleInfo(Role.DETECTIVE,noDetective),
-        RoleInfo(Role.GOD,noGod),
+
 
 
 
