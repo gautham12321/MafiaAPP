@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import com.gautham.mafia.ui.theme.MafiaTheme
 
 @Composable
 fun JoinRoom(modifier: Modifier =Modifier,onSearch: (String)->Unit){
+
     Column(modifier = modifier
         .fillMaxSize()
         .offset(y = 50.dp),
@@ -32,7 +34,7 @@ fun JoinRoom(modifier: Modifier =Modifier,onSearch: (String)->Unit){
         Text(text = "ENTER ROOM ID", style = typography.displayLarge.copy(color = Color.Black,
             textAlign = TextAlign.Center,lineHeight = 40.sp))
 
-        searchBar_M(modifier=Modifier.padding(16.dp),onSearch)
+        searchBar_M(modifier=Modifier.padding(16.dp), onSearch)
 
     }
 

@@ -24,6 +24,7 @@
     import com.mafia2.data.PlayerDet
     import com.mafia2.data.gameSettings
     import dagger.hilt.android.lifecycle.HiltViewModel
+    import kotlinx.coroutines.Job
     import kotlinx.coroutines.delay
     import kotlinx.coroutines.flow.MutableStateFlow
     import kotlinx.coroutines.flow.SharingStarted
@@ -43,8 +44,38 @@
     class MainViewModel @Inject constructor(private val rmc:RealTimeMessagingClient,private val dataRep:DataStoreRepository):ViewModel()
     {
         val TAG="MAINVIEWMODEL"
+        companion object {
+            private const val TIMER_DELAY = 5000L // Example: 5 seconds
+        }
+        private var timerJob: Job? = null
+        private var shouldCheckTimer = true
 
+        private fun resetTimer() {
+            Log.d(TAG, "Reset timer called")
+            timerJob?.cancel()
+            timerJob = viewModelScope.launch {
+                while (true) {
+                    delay(TIMER_DELAY) // Example: 5 seconds
+                    if (shouldCheckTimer) {
+                        Log.d(TAG, "Timer elapsed. Calling getState()")
+                        getState()
+                    }
+                }
+            }
+        }
 
+        private fun getState() {
+            viewModelScope.launch {
+                rmc.getRoomState()
+            }
+        }
+        fun setShouldCheckTimer(shouldCheck: Boolean) {
+            resetTimer()
+            shouldCheckTimer = shouldCheck
+            if (!shouldCheck) {
+                timerJob?.cancel()
+            }
+        }
 
 
         val userDetails =dataRep.userPrefsFlow.onStart {
@@ -122,6 +153,7 @@
         var gameState =
             rmc.getGameStateStream()
                 .onStart {
+                    resetTimer()
                     Log.d(TAG+":UPDATESTATE","INTIALIZED")
                     isConnecting.value = true
                         }
@@ -189,6 +221,7 @@
         }
         fun exitRoom(id: String) {
             viewModelScope.launch {
+                setShouldCheckTimer(false)
                 rmc.exitRoom(id)
             }
 

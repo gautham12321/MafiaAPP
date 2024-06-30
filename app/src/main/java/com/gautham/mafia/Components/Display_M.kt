@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,7 @@ fun Display_M(modifier: Modifier=Modifier,onDone:(String)->Unit={},text:String="
         mutableStateOf(text)
 
     }
+    val keyboardController = LocalSoftwareKeyboardController.current
     Card(modifier = modifier
         .shadow(offsetY = 80.dp, borderRadius = 5.dp, blurRadius = 15.dp)
         .size(width = 250.dp, height = 70.dp)
@@ -107,7 +109,10 @@ fun Display_M(modifier: Modifier=Modifier,onDone:(String)->Unit={},text:String="
                        innerTextField()
 
 
-                    })
+                    },keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done), singleLine = true,keyboardActions = KeyboardActions(onDone = {
+
+                        keyboardController?.hide()
+                    }))
 
 
             }
