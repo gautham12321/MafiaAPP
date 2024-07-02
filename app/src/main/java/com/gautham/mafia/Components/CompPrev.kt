@@ -32,9 +32,9 @@ fun screenPreviews(){
             )
             {
                 Button_M(modifier = Modifier)
-                Counter(size = 50.dp, onIncrease = { /*TODO*/ }) {
+                Counter(size = 50.dp, onIncrease = { /*TODO*/ }, onDecrease = {
 
-                }
+                }, showvalue = true)
                 Spacer(modifier = Modifier.height(15.dp))
                 switch_M(checked = true)
                // Profile(size = 400f, onClick = {}, playerdet = playerdet)

@@ -424,7 +424,8 @@ val hostPlayer = setup.hostDetails
                             navController.popBackStack(Home, false)
 
                         }, sharedScope=this@SharedTransitionLayout,
-                        animatedScope=this@composable)
+                        animatedScope=this@composable,
+                        )
                     //empty
                     BackHandler {
                         navController.popBackStack(Home, false)

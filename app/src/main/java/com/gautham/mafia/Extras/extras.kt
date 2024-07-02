@@ -105,12 +105,18 @@ val avatarImages = listOf(
     R.drawable.sideye,
     R.drawable.sus,
     R.drawable.wolf, R.drawable._17b09161d5d538c61a5716bfa7dc172,
-    R.drawable._181b0a103e6a22270d3449ebb54c322, R.drawable._189cb2f9a80b85c3b133efa3a4e6e55,
-    R.drawable._49b46ea804e07f5fba7ad425bb41023, R.drawable._53a24a44c7df0689720d69ed15f8db1,
-    R.drawable._607f88226129a9f6906c68b1c521131, R.drawable._7deed22da91d3a463a3921738a5f98c,
-    R.drawable._c486a070ddf3e02457c6100c0bef8cd, R.drawable._ea277a2c6fc36245f0cf0c188f2228f,
-    R.drawable.ae1c741effe77f0a31130c4ba72d575a, R.drawable.d41ddd0e6fa2f83709d24fc66fcd515c,
+    R.drawable._181b0a103e6a22270d3449ebb54c322,
+    R.drawable._189cb2f9a80b85c3b133efa3a4e6e55,
+    R.drawable._49b46ea804e07f5fba7ad425bb41023,
+    R.drawable._53a24a44c7df0689720d69ed15f8db1,
+    R.drawable._607f88226129a9f6906c68b1c521131,
+    R.drawable._7deed22da91d3a463a3921738a5f98c,
+    R.drawable._c486a070ddf3e02457c6100c0bef8cd,
+    R.drawable._ea277a2c6fc36245f0cf0c188f2228f,
+    R.drawable.ae1c741effe77f0a31130c4ba72d575a,
+    R.drawable.d41ddd0e6fa2f83709d24fc66fcd515c,
     R.drawable.d702635806a16ab88cede1a72548a5fa,
+
 
 
 
@@ -124,6 +130,21 @@ fun getRandomAvatarImage(): Avatar {
  previous=randomIndex
 
     return Avatar(avatarImages[randomIndex])
+
+
+}
+fun getPrevAvatarImage(currentImage: Int): Avatar {
+    val index=avatarImages.indexOf(currentImage)
+
+    return Avatar(avatarImages[(index   + (avatarImages.size-1))% avatarImages.size])
+
+
+}
+
+fun getNextAvatarImage(currentImage: Int): Avatar {
+    val index=avatarImages.indexOf(currentImage)
+
+    return Avatar(avatarImages[(index+1)% avatarImages.size])
 
 
 }

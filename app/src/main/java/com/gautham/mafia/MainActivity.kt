@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "onResume: ")
 
         super.onResume()
+
     }
     override fun onPause() {
         Log.d(TAG, "onPause: ")
