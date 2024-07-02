@@ -4,9 +4,11 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -39,13 +41,13 @@ fun CreateRoom(
         )
 
     {
-        Text(text = "GAME SETTINGS", textAlign = TextAlign.Center,style = Typography.displayLarge.copy(lineHeight = 30.sp, fontSize = 35.sp),modifier = modifier.padding(16.dp))
+        Text(text = "GAME SETTINGS", textAlign = TextAlign.Center,style = Typography.displayLarge.copy(lineHeight = 30.sp, fontSize = 35.sp),modifier = modifier.offset(y=10.dp).padding(16.dp))
 
 val gameList=gameSettings.toList().toMutableList()
         SettingsCard(modifier, gameSettings, gameList =gameList , onChange = onChange,isHost = true)
 
-        IconButton(onClick = {onNavigate()},modifier = modifier.size(100.dp).offset(y = (16).dp)) {
-            Icon(modifier = Modifier.size(500.dp),imageVector = Icons.Default.PlayArrow, contentDescription ="Go To Lobby", tint = Black_M )
+        IconButton(onClick = {onNavigate()},modifier = modifier.size(100.dp) ){
+            Icon(modifier = modifier.size(500.dp),imageVector = Icons.Default.PlayArrow, contentDescription ="Go To Lobby", tint = Black_M )
 
 
 

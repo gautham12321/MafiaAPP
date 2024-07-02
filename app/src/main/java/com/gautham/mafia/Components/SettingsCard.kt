@@ -78,7 +78,7 @@ fun SettingsCard(
             }
             Text(
                 text = "Players",
-                modifier = modifier.padding(top = 20.dp, bottom = 10.dp),
+                modifier = Modifier.padding(top = 20.dp, bottom = 10.dp),
                 style = Typography.titleLarge.copy(fontSize = 40.sp, shadow = null)
             )
 

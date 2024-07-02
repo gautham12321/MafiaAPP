@@ -31,7 +31,6 @@
     import kotlinx.coroutines.flow.asStateFlow
     import kotlinx.coroutines.flow.catch
     import kotlinx.coroutines.flow.distinctUntilChanged
-    import kotlinx.coroutines.flow.filterNotNull
     import kotlinx.coroutines.flow.onEach
     import kotlinx.coroutines.flow.onStart
     import kotlinx.coroutines.flow.stateIn
@@ -43,13 +42,16 @@
     @HiltViewModel
     class MainViewModel @Inject constructor(private val rmc:RealTimeMessagingClient,private val dataRep:DataStoreRepository):ViewModel()
     {
+
+
+        val lastRoomId = MutableStateFlow("")
         val TAG="MAINVIEWMODEL"
         companion object {
-            private const val TIMER_DELAY = 5000L // Example: 5 seconds
+            private const val TIMER_DELAY = 10000L // Example: 5 seconds
         }
         private var timerJob: Job? = null
-        private var shouldCheckTimer = true
-
+        private var shouldCheckTimer = false
+        var ScreenNavJob:Job?=null
         private fun resetTimer() {
             Log.d(TAG, "Reset timer called")
             timerJob?.cancel()
@@ -158,6 +160,7 @@
                     isConnecting.value = true
                         }
                 .onEach{
+                   resetTimer()
                     isConnecting.value = false
                 Log.d(TAG+":UPDATESTATES",it.toString())
 
@@ -204,18 +207,37 @@
         }
         fun createRoom(){
             viewModelScope.launch {
+
                 rmc.createRoom(userDetails.value,gameSettings.value)
-                while(isConnecting.value)
+
+
+                while(isConnecting.value || gameState.value.id== lastRoomId.value)
+                {
+
                     delay(1000)
 
+                    }
+                setShouldCheckTimer(true)
                 rmc.updateGameSetting(gameState.value.id,gameSettings.value)
+                //Log.d(TAG+":ROOMID","$safe:Last${lastRoomId.value}:Current${gameState.value.id}")
+                lastRoomId.update {
+                    gameState.value.id
+                }
+
+
+                Log.d(TAG+":ROOMID",gameState.value.id)
             }
         }
         fun joinRoom(roomId:String) {
             viewModelScope.launch {
+
                 rmc.joinRoom(roomId, userDetails.value)
-                while (isConnecting.value)
+
+                while (isConnecting.value && gameState.value.id== lastRoomId.value)
                     delay(1000)
+
+                lastRoomId.update { gameState.value.id }
+                setShouldCheckTimer(true)
             }
 
         }
@@ -244,7 +266,7 @@
 
         }
 
-        fun changeGameSettings(it: gameSettings, sendtoServer: Boolean=false) {
+        fun changeGameSettings(it: gameSettings, sendtoServer: Boolean=true) {
             Log.d(TAG+":UPDATE",it.toString())
             gameSettings.update {settings->
                 it
@@ -256,7 +278,7 @@
 
         }
         fun sendGameSettings(){
-
+            Log.d("$TAG:SENDGAME",gameSettings.value.toString())
             viewModelScope.launch {
                 rmc.sendGameSettings(gameState.value.id,gameSettings.value)
             }
@@ -265,12 +287,16 @@
 
         }
 
+        fun cancelAutoNav(){
 
+            ScreenNavJob?.cancel()
+
+        }
 
         fun gotoLoc(navController: NavHostController, loc: NavObject, delay: Long=0) {
             if(loc.toString().substringBefore('@')!=navController.currentBackStackEntry?.destination?.route.toString()) {
-
-               viewModelScope.launch {
+                ScreenNavJob?.cancel()
+                 ScreenNavJob=  viewModelScope.launch {
                 delay(delay)
 
                    navController.navigate(loc)

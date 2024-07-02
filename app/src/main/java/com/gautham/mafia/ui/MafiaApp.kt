@@ -164,6 +164,7 @@ val hostPlayer = setup.hostDetails
                     viewmodel.startSplashScreen(navController)
                     MafiaSplashScreen(modifier = Modifier.fillMaxSize().clickable {
 
+                        viewmodel.cancelAutoNav()
                         navController.navigate(Home)
 
                     })
@@ -220,6 +221,7 @@ val hostPlayer = setup.hostDetails
                         }
 
                     }, onChange = {
+
                         viewmodel.changeGameSettings(it, true)
 
 
@@ -230,7 +232,7 @@ val hostPlayer = setup.hostDetails
                 }
                 composable<Lobby> {
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-                    viewmodel.setShouldCheckTimer(true)
+
                     ratio = it.toRoute<Lobby>().ratio
                     LobbyScreen(room_id = state.id,
                         onStart = {
