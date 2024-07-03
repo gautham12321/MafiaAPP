@@ -57,6 +57,7 @@ interface RealTimeMessagingClient {
     )
     suspend fun resetGame(id: String)
     suspend fun exitRoom(id: String)
+    suspend fun getRoomState()
 }
 
 class KtorRMC(val client: HttpClient) : RealTimeMessagingClient {
@@ -102,6 +103,11 @@ class KtorRMC(val client: HttpClient) : RealTimeMessagingClient {
     override suspend fun exitRoom(id: String) {
         val textSend = "ExitRoom#$id"
         logMessage("EXIT_ROOM", textSend)
+        session?.outgoing?.send(Frame.Text(textSend))
+    }
+
+    override suspend fun getRoomState() {
+        val textSend = "get_RoomUpdate"
         session?.outgoing?.send(Frame.Text(textSend))
     }
 

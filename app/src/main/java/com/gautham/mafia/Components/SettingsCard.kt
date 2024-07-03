@@ -78,12 +78,12 @@ fun SettingsCard(
             }
             Text(
                 text = "Players",
-                modifier = modifier.padding(top = 20.dp, bottom = 10.dp),
+                modifier = Modifier.padding(top = 20.dp, bottom = 10.dp),
                 style = Typography.titleLarge.copy(fontSize = 40.sp, shadow = null)
             )
 
             Log.d("UPDATE",settings.toString())
-            Counter(currentValue = settings.totalP.toInt(), size = 50.dp,
+            Counter(size = 50.dp, currentValue = settings.totalP.toInt(),
                 onIncrease = {
 
 
@@ -101,7 +101,8 @@ fun SettingsCard(
                             Toast.makeText(context, "Minimum 4 players", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    })
+                    }, showvalue = true
+            )
 
 
 
@@ -129,8 +130,8 @@ fun SettingsCard(
                                     .size(100.dp)
                             )
                             Counter(
-                                currentValue = it.no,
                                 size = 40.dp,
+                                currentValue = it.no,
                                 onIncrease =
                                 {
                                     if(isHost){
@@ -194,7 +195,9 @@ fun SettingsCard(
                                     }
 
 
-                                })
+                                },
+                                showvalue = true
+                            )
 
                         }
 

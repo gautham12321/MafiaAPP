@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -124,7 +125,7 @@ fun LobbyScreen( //LOBBY settings need to be edited only by  the host and when i
                 text = if(allPlayersJoined) "START" else "${players.size}/${gameSettings.totalP}",
                 modifier = modifier
 
-                    .fillMaxWidth(fraction = 0.9f), enabled = allPlayersJoined,
+                    .fillMaxWidth(fraction = 0.9f).paddingFromBaseline(bottom = 50.dp), enabled = allPlayersJoined,
                 onClick = onStart
 
 

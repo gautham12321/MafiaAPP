@@ -28,23 +28,26 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 @AndroidEntryPoint
 
 class MainActivity : ComponentActivity() {
+    val TAG ="ACTIVITYT"
+    var viewmodel:MainViewModel?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MafiaTheme {
                 val navController = rememberNavController()
-                val viewmodel = hiltViewModel<MainViewModel>()
+                 viewmodel = hiltViewModel<MainViewModel>()
                 val windowInsetsController =
                     WindowCompat.getInsetsController(window, window.decorView)
                 windowInsetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) {
+                    innerPadding ->
                     MafiaApp(
                         navController=navController,
-                        viewmodel=viewmodel,
+                        viewmodel=viewmodel!!,
                         innerPadding=innerPadding,
                         windowInsetsController
 
@@ -54,10 +57,38 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    override fun onResume() {
+
+        Log.d(TAG, "onResume: ")
+
+        super.onResume()
+
+    }
+    override fun onPause() {
+        Log.d(TAG, "onPause: ")
+        super.onPause()
+    }
+    override fun onStart() {
+        Log.d(TAG, "onStart: ")
+        super.onStart()
+    }
 
     override fun onDestroy() {
-
+        Log.d(TAG, "onDestroy: ")
         super.onDestroy()
+    }
+    override fun onStop() {
+        Log.d(TAG, "onStop: ")
+        super.onStop()
+    }
+    override fun onRestart() {
+        Log.d(TAG, "onRestart: ")
+        super.onRestart()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d(TAG, "onSaveInstanceState: ")
+        super.onSaveInstanceState(outState)
     }
 
 

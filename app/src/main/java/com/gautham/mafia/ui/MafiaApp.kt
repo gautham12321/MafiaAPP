@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.ComponentDialog
+
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -15,12 +15,15 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,13 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavHostController
-import androidx.navigation.activity
+
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -86,7 +90,7 @@ import kotlin.system.exitProcess
 fun MafiaApp(
     navController: NavHostController,
     viewmodel: MainViewModel,
-    innerPadding: PaddingValues,
+  innerPadding: PaddingValues,
     windowInsetsController: WindowInsetsControllerCompat,
 
 
@@ -148,23 +152,29 @@ val hostPlayer = setup.hostDetails
                 navController = navController,
                 startDestination = splashScreen,
                 enterTransition ={
-                                 fadeIn(animationSpec = spring(Spring.DampingRatioNoBouncy,Spring.StiffnessHigh),0f)
+                                 fadeIn(animationSpec = spring(Spring.DampingRatioLowBouncy,Spring.StiffnessMedium),0f)
 
                 } ,
                 exitTransition = { fadeOut(animationSpec = spring(Spring.DampingRatioNoBouncy,Spring.StiffnessHigh)) } ,
 
 
-                modifier = Modifier
+                modifier = Modifier.consumeWindowInsets(innerPadding)
             ) {
                 composable<splashScreen>{
                     viewmodel.startSplashScreen(navController)
-                    MafiaSplashScreen(modifier = Modifier.fillMaxSize())
+                    MafiaSplashScreen(modifier = Modifier.fillMaxSize().clickable {
+
+                        viewmodel.cancelAutoNav()
+                        navController.navigate(Home)
+
+                    })
                     BackHandler {}
 
 
                 }
                 //Might have to change
                 composable<Home> {
+
                     ratio = it.toRoute<Home>().ratio
                     Box(modifier = Modifier.offset(y = -30.dp))
                     {
@@ -211,6 +221,7 @@ val hostPlayer = setup.hostDetails
                         }
 
                     }, onChange = {
+
                         viewmodel.changeGameSettings(it, true)
 
 
@@ -321,9 +332,10 @@ val hostPlayer = setup.hostDetails
 
                 }
                 composable<JoinRoom> {
+                    val keyboardController = LocalSoftwareKeyboardController.current
                     ratio = it.toRoute<JoinRoom>().ratio
                     JoinRoom(onSearch = {
-
+                        keyboardController?.hide()
                         viewmodel.searchRoom(it)
                         navController.navigate(Searching.apply { roomId = it })
 
@@ -412,7 +424,8 @@ val hostPlayer = setup.hostDetails
                             navController.popBackStack(Home, false)
 
                         }, sharedScope=this@SharedTransitionLayout,
-                        animatedScope=this@composable)
+                        animatedScope=this@composable,
+                        )
                     //empty
                     BackHandler {
                         navController.popBackStack(Home, false)
