@@ -83,6 +83,52 @@ fun copyToClipboard(context: Context, text: String) {
 }
 
 val avatarImages = listOf(
+    R.drawable.vd346c68,
+    R.drawable.b025397e,
+    R.drawable.x3302472,
+    R.drawable.x87a6e4a,
+    R.drawable.t759c4d5,
+    R.drawable.a2293748,
+
+    R.drawable.lf0468f6,
+    R.drawable.g67687a0,
+    R.drawable.q3da1ec0,
+    R.drawable.a1a2237e,
+    R.drawable.f878384c,
+    R.drawable.b725ec16,
+    R.drawable.b35b05f9,
+    R.drawable.c5f194d6,
+    R.drawable.fa054ad3,
+    R.drawable.dd72bb71,
+    R.drawable.ba6905b6,
+    R.drawable.z7ce5e66,
+    R.drawable.mc4a7330,
+    R.drawable.ee47ee18,
+    R.drawable.e8a5149b,
+    R.drawable.i951ac97,
+    R.drawable.c78bf3c5,
+    R.drawable.t7e6bd8e,
+    R.drawable.c51ede1b,
+    R.drawable.f8a50d7f,
+    R.drawable.da5f233e,
+    R.drawable.i3fa834d,
+    R.drawable.w618449a,
+    R.drawable.m94f41f0,
+    R.drawable.h77f357b,
+    R.drawable.b727d6d5,
+    R.drawable.f906995f,
+    R.drawable.a722e0c8,
+    R.drawable.b22d3f77,
+    R.drawable.j9daba8a,
+    R.drawable.d9aa1b78,
+    R.drawable.ic0ece92,
+    R.drawable.yab1ac88,
+    R.drawable.p95a4900,
+    R.drawable.pdfea070,
+    R.drawable.r25566ef,
+    R.drawable.d88cadfd,
+    R.drawable.cad4c3e5,
+
     R.drawable._043229_afro_avatar_male_man_icon,
     R.drawable._043232_avatar_batman_comics_hero_icon,
     R.drawable._043243_actor_chaplin_comedy_man_icon,
@@ -104,7 +150,8 @@ val avatarImages = listOf(
     R.drawable.sad,
     R.drawable.sideye,
     R.drawable.sus,
-    R.drawable.wolf, R.drawable._17b09161d5d538c61a5716bfa7dc172,
+    R.drawable.wolf,
+    R.drawable._17b09161d5d538c61a5716bfa7dc172,
     R.drawable._181b0a103e6a22270d3449ebb54c322,
     R.drawable._189cb2f9a80b85c3b133efa3a4e6e55,
     R.drawable._49b46ea804e07f5fba7ad425bb41023,
@@ -116,18 +163,24 @@ val avatarImages = listOf(
     R.drawable.ae1c741effe77f0a31130c4ba72d575a,
     R.drawable.d41ddd0e6fa2f83709d24fc66fcd515c,
     R.drawable.d702635806a16ab88cede1a72548a5fa,
+    R.drawable.d41c81e2,
 
 
 
 
-)
+
+
+
+
+    )
 var previous = 0
 fun getRandomAvatarImage(): Avatar {
     var randomIndex=0
     do {
       randomIndex = avatarImages.indices.random()
  }while (previous==randomIndex)
- previous=randomIndex
+
+        previous=randomIndex
 
     return Avatar(avatarImages[randomIndex])
 
