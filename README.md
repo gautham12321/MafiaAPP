@@ -1,5 +1,10 @@
 # Mafia Game App
 
+# DEMO LINKS
+
+https://drive.google.com/drive/folders/1fJMIxFozE92TH0v56gcZHtZdBhHTHcUP?usp=sharing
+https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7226596147149033472?compact=1
+
 ## Overview
 The Mafia Game App is a social deduction game where players are assigned roles as either "Mafia" or "Citizens". The game progresses through day and night phases, where players discuss, vote, and perform actions based on their roles to identify and eliminate the opposing team. The app does not require a physical narrator as it handles game progression and role management. Players start by creating or joining a game room, setting up their profiles, and joining a lobby where the host waits for all players and sets game settings. During gameplay, players are arranged in a circle, with the current phase and day number displayed, and role-based action buttons appearing as needed. The game continues until a victory condition is met, with the Mafia or the Citizens emerging as the winners.
 
